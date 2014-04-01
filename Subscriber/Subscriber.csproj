@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B07B83BB-C583-4F3E-9712-CCD9772D871F}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>qSharp.Sample</RootNamespace>
+    <AssemblyName>Subscriber</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <!-- The major, minor, build and revision parts defined -->
+  <PropertyGroup Condition="'$(VERSION_BUILD)' == ''">
+    <major>0</major>
+    <minor>0</minor>
+    <build>0</build>
+    <revision>0</revision>
+    <commit></commit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(VERSION_BUILD)' != ''">
+    <major>$(VERSION_MAJOR)</major>
+    <minor>$(VERSION_MINOR)</minor>
+    <build>$(VERSION_BUILD)</build>
+    <revision>$(VERSION_REVISION)</revision>
+    <commit></commit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Subscriber.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\qSharp\qSharp.csproj">
+      <Project>{E8542C7D-B1DD-45E3-9C43-5DDCBA351D39}</Project>
+      <Name>qSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+   <!-- Import the msbuildtasks -->
+  <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" Condition="Exists('$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets')" />
+  <!-- 
+       Execute the BeforeBuild step, creating the AssemblyVersionInfo.cs file containing the version numbers.
+       Both version and file version 
+  -->
+  <Target Name="BeforeBuild" Condition="Exists('$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets')">
+    <Message Text="Version: $(major).$(minor).$(revision).$(build)" />
+    <Attrib Files="$(MSBuildProjectDirectory)\Properties\AssemblyInfo.cs" Normal="true" />
+    <AssemblyInfo 
+        CodeLanguage="CS" 
+        OutputFile="$(MSBuildProjectDirectory)\Properties\AssemblyInfo.cs"
+        AssemblyCompany="exxeleron" 
+        AssemblyTitle="qSharp: Subscriber" 
+        AssemblyProduct="qSharp" 
+        AssemblyCopyright="Copyright © exxeleron 2011-2014"
+        AssemblyVersion="$(major).$(minor).$(revision).$(build)" 
+        AssemblyFileVersion="$(major).$(minor).$(revision).$(build)" />
+  </Target>
+</Project>

@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E8542C7D-B1DD-45E3-9C43-5DDCBA351D39}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>qSharp</RootNamespace>
+    <AssemblyName>qSharp</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <!-- The major, minor, build and revision parts defined -->
+  <PropertyGroup Condition="'$(VERSION_BUILD)' == ''">
+    <major>0</major>
+    <minor>0</minor>
+    <build>0</build>
+    <revision>0</revision>
+    <commit>
+    </commit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(VERSION_BUILD)' != ''">
+    <major>$(VERSION_MAJOR)</major>
+    <minor>$(VERSION_MINOR)</minor>
+    <build>$(VERSION_BUILD)</build>
+    <revision>$(VERSION_REVISION)</revision>
+    <commit>
+    </commit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\..\xlkdb\trunk\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\QBasicConnection.cs" />
+    <Compile Include="src\QCallbackConnection.cs" />
+    <Compile Include="src\QMessage.cs" />
+    <Compile Include="src\QConnection.cs" />
+    <Compile Include="src\QConnectionException.cs" />
+    <Compile Include="src\QWriterException.cs" />
+    <Compile Include="src\QReaderException.cs" />
+    <Compile Include="src\QKeyedTable.cs" />
+    <Compile Include="src\EndianBinaryReader.cs" />
+    <Compile Include="src\IDateTime.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\QDate.cs" />
+    <Compile Include="src\QDateTime.cs" />
+    <Compile Include="src\QDictionary.cs" />
+    <Compile Include="src\QException.cs" />
+    <Compile Include="src\QLambda.cs" />
+    <Compile Include="src\QMinute.cs" />
+    <Compile Include="src\QMonth.cs" />
+    <Compile Include="src\QReader.cs" />
+    <Compile Include="src\QSecond.cs" />
+    <Compile Include="src\QTable.cs" />
+    <Compile Include="src\QTime.cs" />
+    <Compile Include="src\QTimespan.cs" />
+    <Compile Include="src\QTimestamp.cs" />
+    <Compile Include="src\QWriter.cs" />
+    <Compile Include="src\QType.cs" />
+    <Compile Include="src\Utils.cs" />
+    <Compile Include="test\DataTypeTest.cs" />
+    <Compile Include="test\DateTimeTest.cs" />
+    <Compile Include="test\QExpression.cs" />
+    <Compile Include="test\QReaderTest.cs" />
+    <Compile Include="test\QWriterTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="test\QCompressedExpressions.in" />
+    <None Include="test\QCompressedExpressions.out" />
+    <None Include="test\QExpressions.in" />
+    <None Include="test\QExpressions.out" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  -->
+  <!-- Import the msbuildtasks -->
+  <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" Condition="Exists('$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets')" />
+  <!-- 
+       Execute the BeforeBuild step, creating the AssemblyVersionInfo.cs file containing the version numbers.
+       Both version and file version 
+  -->
+  <Target Name="BeforeBuild" Condition="Exists('$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets')">
+    <Message Text="Version: $(major).$(minor).$(revision).$(build)" />
+    <Attrib Files="$(MSBuildProjectDirectory)\Properties\AssemblyInfo.cs" Normal="true" />
+    <AssemblyInfo CodeLanguage="CS" OutputFile="$(MSBuildProjectDirectory)\Properties\AssemblyInfo.cs" AssemblyCompany="exxeleron" AssemblyTitle="qSharp" AssemblyProduct="qSharp" AssemblyCopyright="Copyright © exxeleron 2011-2014" AssemblyVersion="$(major).$(minor).$(revision).$(build)" AssemblyFileVersion="$(major).$(minor).$(revision).$(build)" />
+  </Target>
+  <Target Name="AfterBuild">
+    <Exec Command="doxygen.exe doxygen.cfg" IgnoreExitCode="True" Condition="$(DOXYGEN_PATH) == ''" />
+    <Exec Command="$(DOXYGEN_PATH)\doxygen.exe doxygen.cfg" IgnoreExitCode="True" Condition="$(DOXYGEN_PATH) != ''" />
+  </Target>
+</Project>
