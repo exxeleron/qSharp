@@ -270,7 +270,14 @@ namespace qSharp
                 return row;
             }
 
-
+            /// <summary>
+            ///     Returns a System.String that represents the current QTable row.
+            /// </summary>
+            /// <returns>A System.String that represents the current QTable row</returns>
+            public override string ToString()
+            {
+                return Utils.ArrayToString(_table.Columns) + "!" + Utils.ArrayToString(ToArray());
+            }
         }
 
         /// <summary>

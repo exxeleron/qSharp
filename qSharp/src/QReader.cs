@@ -526,6 +526,10 @@ namespace qSharp
             {
                 return new QDictionary(keys as Array, values as Array);
             }
+            if (keys is Array && values is QTable)
+            {
+                return new QDictionary(keys as Array, values as QTable);
+            }
             if (keys is QTable && values is QTable)
             {
                 return new QKeyedTable(keys as QTable, values as QTable);

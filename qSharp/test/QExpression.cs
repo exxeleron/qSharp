@@ -122,6 +122,11 @@ namespace qSharp.test
                             {"(enlist `a)!(enlist 1)", new QDictionary(new[] {"a"}, new[] {1})},
                             {"1 2!`abc`cdefgh", new QDictionary(new[] {1, 2}, new[] {"abc", "cdefgh"})},
                             {
+                                "`abc`def`gh!([] one: 1 2 3; two: 4 5 6)", 
+                                new QDictionary(new string[] { "abc", "def", "gh" },
+                                                new QTable(new[] {"one", "two"}, new object[] {new[] {1L, 2L, 3L}, new[] {4L, 5L, 6L}}))
+                            },
+                            {
                                 "(1;2h;3.3;\"4\")!(`one;2 3;\"456\";(7;8 9))",
                                 new QDictionary(new object[] {1, (short) 2, 3.3, '4'},
                                                 new object[]
@@ -283,6 +288,11 @@ namespace qSharp.test
                             {"{x+y}[3]", new QLambda("{x+y}", new object[] {(long) 3})},
                             {"(enlist `a)!(enlist 1)", new QDictionary(new[] {"a"}, new long[] {1})},
                             {"1 2!`abc`cdefgh", new QDictionary(new long[] {1, 2}, new[] {"abc", "cdefgh"})},
+                                                        {
+                                "`abc`def`gh!([] one: 1 2 3; two: 4 5 6)", 
+                                new QDictionary(new string[] { "abc", "def", "gh" },
+                                                new QTable(new[] {"one", "two"}, new object[] {new[] {1L, 2L, 3L}, new[] {4L, 5L, 6L}}))
+                            },
                             {
                                 "(1;2h;3.3;\"4\")!(`one;2 3;\"456\";(7;8 9))",
                                 new QDictionary(new object[] {(long) 1, (short) 2, 3.3, '4'},

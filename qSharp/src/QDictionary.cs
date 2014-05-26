@@ -25,7 +25,8 @@ namespace qSharp
     public sealed class QDictionary : IEnumerable
     {
         private readonly Array keys;
-        private readonly Array values;
+        private readonly object values;
+        private readonly bool areValuesArray;
 
         /// <summary>
         ///     Creates new QDictionary instance with given keys and values arrays.
@@ -49,6 +50,32 @@ namespace qSharp
 
             this.keys = keys;
             this.values = values;
+            this.areValuesArray = true;
+        }
+
+        /// <summary>
+        ///     Creates new QDictionary instance with given keys array and table values.
+        /// </summary>
+        public QDictionary(Array keys, QTable values)
+        {
+            if (keys == null || keys.Length == 0)
+            {
+                throw new ArgumentException("Keys array cannot be null or 0-length");
+            }
+
+            if (values == null || values.RowsCount == 0)
+            {
+                throw new ArgumentException("Values table cannot be null or 0-length");
+            }
+
+            if (keys.Length != values.RowsCount)
+            {
+                throw new ArgumentException("Keys and value arrays cannot have different length");
+            }
+
+            this.keys = keys;
+            this.values = values;
+            this.areValuesArray = false;
         }
 
         /// <summary>
@@ -62,7 +89,7 @@ namespace qSharp
         /// <summary>
         ///     Gets an array with dictionary values.
         /// </summary>
-        public Array Values
+        public object Values
         {
             get { return values; }
         }
@@ -94,7 +121,14 @@ namespace qSharp
                 return false;
             }
 
-            return Utils.ArrayEquals(Keys, d.Keys) && Utils.ArrayEquals(Values, d.Values);
+            if (areValuesArray)
+            {
+                return Utils.ArrayEquals(Keys, d.Keys) && Utils.ArrayEquals(Values as Array, d.Values as Array);
+            }
+            else
+            {
+                return Utils.ArrayEquals(Keys, d.Keys) && (Values as QTable).Equals(d.Values);
+            }
         }
 
         public override int GetHashCode()
@@ -114,7 +148,14 @@ namespace qSharp
                 return false;
             }
 
-            return Utils.ArrayEquals(Keys, d.Keys) && Utils.ArrayEquals(Values, d.Values);
+            if (areValuesArray)
+            {
+                return Utils.ArrayEquals(Keys, d.Keys) && Utils.ArrayEquals(Values as Array, d.Values as Array);
+            }
+            else
+            {
+                return Utils.ArrayEquals(Keys, d.Keys) && (Values as QTable).Equals(d.Values);
+            }
         }
 
         /// <summary>
@@ -123,7 +164,14 @@ namespace qSharp
         /// <returns>A System.String that represents the current QDictionary</returns>
         public override string ToString()
         {
-            return "QDictionary: " + Utils.ArrayToString(Keys) + "!" + Utils.ArrayToString(Values);
+            if (areValuesArray)
+            {
+                return "QDictionary: " + Utils.ArrayToString(Keys) + "!" + Utils.ArrayToString(Values as Array);
+            }
+            else
+            {
+                return "QDictionary: " + Utils.ArrayToString(Keys) + "!" + (Values as QTable).ToString();
+            }
         }
 
         /// <summary>
@@ -156,8 +204,19 @@ namespace qSharp
             /// </summary>
             public object Value
             {
-                get { return _dictionary.values.GetValue(_index); }
+                get 
+                {
+                    if (_dictionary.areValuesArray)
+                    {
+                        return (_dictionary.values as Array).GetValue(_index);
+                    }
+                    else
+                    {
+                        return (_dictionary.values as QTable)[_index];
+                    }
+                }
             }
+
         }
 
         /// <summary>
