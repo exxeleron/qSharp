@@ -15,9 +15,6 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace qSharp.Sample
 {
@@ -58,7 +55,8 @@ namespace qSharp.Sample
 
         static void OnData(object sender, QMessageEvent message)
         {
-            PrintResult(message.Message.Data);
+            Console.WriteLine("Asynchronous message received: " + message.Message.Data);
+            Console.WriteLine("message type: " + message.Message.MessageType + " size: " + message.Message.MessageSize + " isCompressed: " + message.Message.Compressed + " endianess: " + message.Message.Endianess);
         }
 
         static void OnError(object sender, QErrorEvent error)
@@ -66,79 +64,5 @@ namespace qSharp.Sample
             Console.Error.WriteLine("Error received via callback: " + error.Cause.Message);
         }
 
-        static void PrintResult(object obj)
-        {
-            if (obj == null)
-            {
-                Console.WriteLine("::");
-            }
-            else if (obj is Array)
-            {
-                PrintResult(obj as Array);
-            }
-            else if (obj is QDictionary)
-            {
-                PrintResult(obj as QDictionary);
-            }
-            else if (obj is QTable)
-            {
-                PrintResult(obj as QTable);
-            }
-            else
-            {
-                Console.WriteLine(obj);
-            }
-        }
-
-        static void PrintResult(Array a)
-        {
-            Console.WriteLine(Utils.ArrayToString(a));
-        }
-
-        static void PrintResult(QDictionary d)
-        {
-            foreach (QDictionary.KeyValuePair e in d)
-            {
-                Console.WriteLine(e.Key + "| " + e.Value);
-            }
-        }
-
-        static void PrintResult(QTable t)
-        {
-            var rowsToShow = Math.Min(t.RowsCount, 20);
-            var dataBuffer = new object[1 + rowsToShow][];
-            var columnWidth = new int[t.ColumnsCount];
-
-            dataBuffer[0] = new string[t.ColumnsCount];
-            for (int j = 0; j < t.ColumnsCount; j++)
-            {
-                dataBuffer[0][j] = t.Columns[j];
-                columnWidth[j] = t.Columns[j].Length + 1;
-            }
-
-            for (int i = 1; i < rowsToShow; i++)
-            {
-                dataBuffer[i] = new string[t.ColumnsCount];
-                for (int j = 0; j < t.ColumnsCount; j++)
-                {
-                    var value = t[i - 1][j].ToString();
-                    dataBuffer[i][j] = value;
-                    columnWidth[j] = Math.Max(columnWidth[j], value.Length + 1);
-                }
-            }
-
-            var formatting = "";
-            for (int i = 0; i < columnWidth.Length; i++)
-            {
-                formatting += "{" + i + ",-" + columnWidth[i] + "}";
-            }
-
-            Console.WriteLine(formatting, dataBuffer[0]);
-            Console.WriteLine(new string('-', columnWidth.Sum()));
-            for (int i = 1; i < rowsToShow; i++)
-            {
-                Console.WriteLine(formatting, dataBuffer[i]);
-            }
-        }
     }
 }
