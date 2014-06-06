@@ -31,11 +31,14 @@ namespace qSharp
     /// </summary>
     public class QBasicConnection : QConnection
     {
+        public const int DefaultMaxReadingChunk = 65536;
+
         public string Host { get; private set; }
         public int Port { get; private set; }
         public string Username { get; private set; }
         public string Password { get; private set; }
         public System.Text.Encoding Encoding { get; private set; }
+        public int MaxReadingChunk { get; private set; }
 
         public int ProtocolVersion { get; protected set; }
 
@@ -53,13 +56,15 @@ namespace qSharp
         /// <param name="username">Username for remote authorization</param>
         /// <param name="password">Password for remote authorization</param>
         /// <param name="encoding">Encoding used for serialization/deserialization of string objects. Default: Encoding.ASCII</param>
-        public QBasicConnection(String host = "localhost", int port = 0, string username = null, string password = null, Encoding encoding = null)
+        /// <param name="maxReadingChunk">Maxium number of bytes read in a single chunk from stream</param>
+        public QBasicConnection(String host = "localhost", int port = 0, string username = null, string password = null, Encoding encoding = null, int maxReadingChunk = DefaultMaxReadingChunk)
         {
             Encoding = encoding ?? Encoding.ASCII;
             Host = host;
             Port = port;
             Username = username;
             Password = password;
+            MaxReadingChunk = maxReadingChunk;
         }
 
         /// <summary>
@@ -74,7 +79,7 @@ namespace qSharp
                     InitSocket();
                     Initialize();
 
-                    Reader = new QReader(stream, Encoding);
+                    Reader = new QReader(stream, Encoding, MaxReadingChunk);
                     Writer = new QWriter(stream, Encoding, ProtocolVersion);
                 }
                 else

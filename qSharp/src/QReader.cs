@@ -35,15 +35,19 @@ namespace qSharp
         private byte[] rawData;
         private EndianBinaryReader reader;
 
+        private int maxReadingChunk;
+
         /// <summary>
         ///     Initializes a new QReader instance.
         /// </summary>
         /// <param name="stream">Input stream containing serialized messages</param>
         /// <param name="encoding">Encoding used for deserialization of string data</param>
-        public QReader(Stream stream, Encoding encoding)
+        /// <param name="maxReadingChunk">Maxium number of bytes read in a single chunk from stream</param>
+        public QReader(Stream stream, Encoding encoding, int maxReadingChunk)
         {
             this.stream = stream;
             this.encoding = encoding;
+            this.maxReadingChunk = maxReadingChunk;
         }
 
         /// <summary>
@@ -120,7 +124,7 @@ namespace qSharp
             int read = 0;
             int chunk;
 
-            while ((chunk = stream.Read(buffer, read, buffer.Length - read)) > 0)
+            while ((chunk = stream.Read(buffer, read, Math.Min(maxReadingChunk, buffer.Length - read))) > 0)
             {
                 read += chunk;
 

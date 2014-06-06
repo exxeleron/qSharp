@@ -52,7 +52,7 @@ namespace qSharp.test
             {
                 var stream = new MemoryStream();
                 var writer = new BinaryWriter(stream);
-                var reader = new QReader(stream, Encoding.ASCII);
+                var reader = new QReader(stream, Encoding.ASCII, QBasicConnection.DefaultMaxReadingChunk);
                 byte[] binaryExpr = expressions.GetBinaryExpression("q2", expr);
                 writer.Write((byte) 1); // little endian
                 writer.Write((byte) 0);
@@ -95,7 +95,7 @@ namespace qSharp.test
             {
                 var stream = new MemoryStream();
                 var writer = new BinaryWriter(stream);
-                var reader = new QReader(stream, Encoding.ASCII);
+                var reader = new QReader(stream, Encoding.ASCII, QBasicConnection.DefaultMaxReadingChunk);
                 byte[] binaryExpr = expressions.GetBinaryExpression("q2", expr);
                 writer.Write((byte) 1); // little endian
                 writer.Write((byte) 0);
@@ -142,7 +142,7 @@ namespace qSharp.test
             {
                 var stream = new MemoryStream();
                 var writer = new BinaryWriter(stream);
-                var reader = new QReader(stream, Encoding.ASCII);
+                var reader = new QReader(stream, Encoding.ASCII, QBasicConnection.DefaultMaxReadingChunk);
                 byte[] binaryExpr = expressions.GetBinaryExpression("q3", expr);
                 writer.Write((byte) 1); // little endian
                 writer.Write((byte) 0);
