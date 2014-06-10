@@ -24,7 +24,6 @@ namespace qSharp
     /// </summary>
     public struct QSecond : IDateTime
     {
-        private const string DateFormat = "HH:mm:ss";
         private const string NullRepresentation = "0Nv";
 
         private DateTime datetime;
@@ -79,7 +78,11 @@ namespace qSharp
         {
             if (Value != int.MinValue)
             {
-                return ToDateTime().ToString(DateFormat);
+                int seconds = Math.Abs(Value);
+                int minutes = seconds / 60;
+                int hours = minutes / 60;
+
+                return String.Format("{0}{1:00}:{2:00}:{3:00}", Value < 0 ? "-" : "", hours, minutes % 60, seconds % 60);
             }
             return NullRepresentation;
         }
@@ -91,9 +94,19 @@ namespace qSharp
         /// <returns>a QSecond instance</returns>
         public static QSecond FromString(string date)
         {
+            if (date == null || date.Length == 0 || date.Equals(NullRepresentation))
+            {
+                return new QSecond(int.MinValue);
+            }
+
             try
             {
-                return date == null || date.Length == 0 || date.Equals(NullRepresentation) ? new QSecond(int.MinValue) : new QSecond(DateTime.ParseExact(date, DateFormat, CultureInfo.InvariantCulture));
+                String[] parts = date.Split(':');
+                int hours = int.Parse(parts[0]);
+                int minutes = int.Parse(parts[1]);
+                int seconds = int.Parse(parts[2]);
+
+                return new QSecond((seconds + 60 * minutes + 3600 * Math.Abs(hours)) * (hours > 0 ? 1 : -1));
             }
             catch (Exception e)
             {

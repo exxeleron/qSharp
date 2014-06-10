@@ -106,6 +106,9 @@ namespace qSharp.test
             Assert.AreEqual("13:30", new QMinute(810).ToString());
             Assert.AreEqual("23:59", new QMinute(1439).ToString());
 
+            Assert.AreEqual("-13:30", new QMinute(-810).ToString());
+            Assert.AreEqual("52:23", new QMinute(3143).ToString());
+
             Assert.AreEqual("0Nu", new QMinute(int.MinValue).ToString());
         }
 
@@ -115,6 +118,9 @@ namespace qSharp.test
             Assert.AreEqual(new QMinute(0), QMinute.FromString("00:00"));
             Assert.AreEqual(new QMinute(810), QMinute.FromString("13:30"));
             Assert.AreEqual(new QMinute(1439), QMinute.FromString("23:59"));
+
+            Assert.AreEqual(new QMinute(-810), QMinute.FromString("-13:30"));
+            Assert.AreEqual(new QMinute(3143), QMinute.FromString("52:23"));
 
             Assert.AreEqual(new QMinute(int.MinValue), QMinute.FromString(null));
             Assert.AreEqual(new QMinute(int.MinValue), QMinute.FromString(""));
@@ -172,6 +178,9 @@ namespace qSharp.test
             Assert.AreEqual("13:30:13", new QSecond(48613).ToString());
             Assert.AreEqual("23:59:59", new QSecond(86399).ToString());
 
+            Assert.AreEqual("51:46:39", new QSecond(186399).ToString());
+            Assert.AreEqual("-23:59:59", new QSecond(-86399).ToString());
+
             Assert.AreEqual("0Nv", new QSecond(int.MinValue).ToString());
         }
 
@@ -181,6 +190,9 @@ namespace qSharp.test
             Assert.AreEqual(new QSecond(0), QSecond.FromString("00:00:00"));
             Assert.AreEqual(new QSecond(48613), QSecond.FromString("13:30:13"));
             Assert.AreEqual(new QSecond(86399), QSecond.FromString("23:59:59"));
+
+            Assert.AreEqual(new QSecond(186399), QSecond.FromString("51:46:39"));
+            Assert.AreEqual(new QSecond(-86399), QSecond.FromString("-23:59:59"));
 
             Assert.AreEqual(new QSecond(int.MinValue), QSecond.FromString(null));
             Assert.AreEqual(new QSecond(int.MinValue), QSecond.FromString(""));
@@ -202,6 +214,9 @@ namespace qSharp.test
             Assert.AreEqual("13:30:13.000", new QTime(48613000).ToString());
             Assert.AreEqual("23:59:59.000", new QTime(86399000).ToString());
 
+            Assert.AreEqual("51:46:39.050", new QTime(186399050).ToString());
+            Assert.AreEqual("-23:59:59.100", new QTime(-86399100).ToString());
+
             Assert.AreEqual("0Nt", new QTime(int.MinValue).ToString());
         }
 
@@ -211,6 +226,9 @@ namespace qSharp.test
             Assert.AreEqual(new QTime(48613000), QTime.FromString("13:30:13.000"));
             Assert.AreEqual(new QTime(0), QTime.FromString("00:00:00.000"));
             Assert.AreEqual(new QTime(86399000), QTime.FromString("23:59:59.000"));
+
+            Assert.AreEqual(new QTime(186399001), QTime.FromString("51:46:39.001"));
+            Assert.AreEqual(new QTime(-86399000), QTime.FromString("-23:59:59.000"));
 
             Assert.AreEqual(new QTime(int.MinValue), QTime.FromString(null));
             Assert.AreEqual(new QTime(int.MinValue), QTime.FromString(""));

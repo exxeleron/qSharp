@@ -24,7 +24,6 @@ namespace qSharp
     /// </summary>
     public struct QTime : IDateTime
     {
-        private const string DateFormat = "HH:mm:ss.fff";
         private const string NullRepresentation = "0Nt";
 
         private DateTime datetime;
@@ -79,7 +78,12 @@ namespace qSharp
         {
             if (Value != int.MinValue)
             {
-                return ToDateTime().ToString(DateFormat);
+                int millis = Math.Abs(Value);
+                int seconds = millis / 1000;
+                int minutes = seconds / 60;
+                int hours = minutes / 60;
+
+                return String.Format("{0}{1:00}:{2:00}:{3:00}.{4:000}", Value < 0 ? "-" : "", hours, minutes % 60, seconds % 60, millis % 1000);
             }
             return NullRepresentation;
         }
@@ -91,9 +95,19 @@ namespace qSharp
         /// <returns>a QTime instance</returns>
         public static QTime FromString(string date)
         {
+            if (date == null || date.Length == 0 || date.Equals(NullRepresentation))
+            {
+                return new QTime(int.MinValue);
+            }
+
             try
             {
-                return date == null || date.Length == 0 || date.Equals(NullRepresentation) ? new QTime(int.MinValue) : new QTime(DateTime.ParseExact(date, DateFormat, CultureInfo.InvariantCulture));
+                String[] parts = date.Split(new char[]{ ':' , '.'});
+                int hours = int.Parse(parts[0]);
+                int minutes = int.Parse(parts[1]);
+                int seconds = int.Parse(parts[2]);
+                int millis = int.Parse(parts[3]);
+                return new QTime((millis + 1000 * seconds + 60000 * minutes + 3600000 * Math.Abs(hours)) * (hours > 0 ? 1 : -1));
             }
             catch (Exception e)
             {

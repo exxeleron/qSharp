@@ -24,7 +24,6 @@ namespace qSharp
     /// </summary>
     public struct QMinute : IDateTime
     {
-        private const string DateFormat = "HH:mm";
         private const string NullRepresentation = "0Nu";
 
         private DateTime datetime;
@@ -79,7 +78,10 @@ namespace qSharp
         {
             if (Value != int.MinValue)
             {
-                return ToDateTime().ToString(DateFormat);
+                int minutes = Math.Abs(Value);
+                int hours = minutes / 60;
+
+                return String.Format("{0}{1:00}:{2:00}", Value < 0 ? "-" : "", hours, minutes % 60);
             }
             return NullRepresentation;
         }
@@ -91,9 +93,18 @@ namespace qSharp
         /// <returns>a QMinute instance</returns>
         public static QMinute FromString(string date)
         {
+            if (date == null || date.Length == 0 || date.Equals(NullRepresentation))
+            {
+                return new QMinute(int.MinValue);
+            }
+
             try
             {
-                return date == null || date.Length == 0 || date.Equals(NullRepresentation) ? new QMinute(int.MinValue) : new QMinute(DateTime.ParseExact(date, DateFormat, CultureInfo.InvariantCulture));
+                String[] parts = date.Split(':');
+                int hours = int.Parse(parts[0]);
+                int minutes = int.Parse(parts[1]);
+
+                return new QMinute((minutes + 60 * Math.Abs(hours)) * (hours > 0 ? 1 : -1));
             }
             catch (Exception e)
             {
