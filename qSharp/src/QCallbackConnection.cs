@@ -167,7 +167,7 @@ namespace qSharp
                     {
                         connection.OnErrorOccured(new QErrorEvent(e));
                     }
-                    catch (IOException e)
+                    catch (Exception e)
                     {
                         connection.OnErrorOccured(new QErrorEvent(e));
                         Running = false;
