@@ -10,3 +10,6 @@ The q/kdb+ interface is implemented as a set of C# classes and provides:
 - Support for kdb+ protocol and types: v3.0, v2.6, v<=2.5
 - Uncompression of the IPC data stream
 - Target framework: .NET Framework 4
+
+
+For more details please refer to the [documentation](doc/Readme.md)
