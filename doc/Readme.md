@@ -2,7 +2,7 @@
 Following sections will guide you on how to use qSharp:
 - [Connection](Connection.md) - information on establishing connection with the kdb+
 - [Queries](Queries.md) - covers interaction with the kdb+ system using queries
-- [Type conversion](Type Conversion.md) - information on type mapping between C# and q
+- [Type conversion](Type-Conversion.md) - information on type mapping between C# and q
 - [Usage examples](Usage-examples.md) - various examples of the qSharp library usage
 - [Migration from qSharp 1.x](Migration-from-1.x-version.md) - provides essential information on switching from closed source version
 
