@@ -94,9 +94,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="test\QCompressedExpressions.in" />
+    <None Include="test\QCompressedExpressions.3.out" />
     <None Include="test\QCompressedExpressions.out" />
-    <None Include="test\QExpressions.in" />
+    <None Include="test\QExpressions.3.out" />
     <None Include="test\QExpressions.out" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
