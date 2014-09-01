@@ -72,7 +72,7 @@ namespace qSharp
         /// </summary>
         virtual public void Open()
         {
-            if (connection == null)
+            if (!IsConnected())
             {
                 if (Host != null)
                 {
@@ -123,7 +123,7 @@ namespace qSharp
         /// </summary>
         virtual public void Close()
         {
-            if (connection != null)
+            if (IsConnected())
             {
                 connection.Close();
                 connection = null;
@@ -144,9 +144,9 @@ namespace qSharp
         }
 
         /// <summary>
-        ///     Check whether connection with the remote q host has been established.
+        ///     Check whether connection with the remote q host has been established and is active.
         /// </summary>
-        /// <returns>true if connection with remote host is established, false otherwise</returns>
+        /// <returns>true if connection with remote host is established and is active, false otherwise</returns>
         public bool IsConnected()
         {
             return connection != null && connection.Connected && connection.Client.Connected
