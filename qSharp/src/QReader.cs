@@ -245,6 +245,7 @@ namespace qSharp
                 case QType.GeneralList:
                     return ReadGeneralList();
                 case QType.NullItem:
+                    reader.ReadSByte(); // ignore
                     return null;
                 case QType.Error:
                     return ReadError();

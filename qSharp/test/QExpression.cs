@@ -98,6 +98,7 @@ namespace qSharp.test
                             {"3.233 6.46", new Double[] {3.233, 6.46}},
 
                             {"(1;`bcd;\"0bc\";5.5e)", new object[] {1, "bcd", "0bc".ToCharArray(), (float) 5.5}},
+                            {"(42;::;`foo)", new object[] { 42, null, "foo" }},
                             {"(enlist 1h; 2; enlist 3j)", new object[] {new short[] {1}, 2, new long[] {3}}},
                             {"(2;`bcd;\"0bc\";5.5e)", new object[] {1, "bcd", "0bc".ToCharArray(), (Single) 5.5}},
                             {"(enlist 2h; 2; enlist 3j)", new object[] {new Int16[] {1}, 2, new long[] {3}}},
@@ -281,6 +282,7 @@ namespace qSharp.test
                             {"3.233 6.46", new Double[] {3.233, 6.46}},
 
                             {"(1;`bcd;\"0bc\";5.5e)", new object[] {(long) 1, "bcd", "0bc".ToCharArray(), (float) 5.5}},
+                            {"(42;::;`foo)", new object[] { 42L, null, "foo" }},
                             {"(enlist 1h; 2; enlist 3j)", new object[] {new short[] {1}, (long) 2, new long[] {3}}},
                             {"(2;`bcd;\"0bc\";5.5e)", new object[] {1, "bcd", "0bc".ToCharArray(), (Single) 5.5}},
                             {"(enlist 2h; 2; enlist 3j)", new object[] {new Int16[] {1}, 2, new long[] {3}}},
