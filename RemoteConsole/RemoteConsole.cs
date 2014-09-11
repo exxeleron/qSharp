@@ -104,7 +104,7 @@ namespace qSharp.Sample
 
         static void PrintResult(QTable t)
         {
-            var rowsToShow = Math.Min(t.RowsCount, 20);
+            var rowsToShow = Math.Min(t.RowsCount + 1, 20);
             var dataBuffer = new object[1 + rowsToShow][];
             var columnWidth = new int[t.ColumnsCount];
 
