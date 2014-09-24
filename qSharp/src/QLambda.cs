@@ -28,6 +28,7 @@ namespace qSharp
 
         /// <summary>
         ///     Creates new QLambda instance with given body and parameters.
+        ///     Note that expression is trimmed and required to be enclosed in { and } brackets.
         /// </summary>
         public QLambda(string expression, Array parameters = null)
         {
@@ -35,6 +36,18 @@ namespace qSharp
             {
                 throw new ArgumentException("Lambda expression cannot be null");
             }
+            expression = expression.Trim();
+            
+            if (expression.Length == 0)
+            {
+                throw new ArgumentException("Lambda expression cannot be empty");
+            }
+
+            if (expression[0] != '{' || expression[expression.Length - 1] != '}')
+            {
+                throw new ArgumentException("Lambda expression is expected to be enclosed in {} brackets");
+            }
+
             this.expression = expression;
             this.parameters = parameters;
         }
