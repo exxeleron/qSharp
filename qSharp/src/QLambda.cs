@@ -15,41 +15,43 @@
 //
 
 using System;
+using System.Text.RegularExpressions;
 
 namespace qSharp
 {
     /// <summary>
     ///     Represents a q lambda expression.
     /// </summary>
-    public sealed class QLambda
+    public sealed class QLambda : QFunction
     {
+        private const string LambdaRegex = @"\s*(k\))?\s*\{.*\}";
+
         private readonly string expression;
-        private readonly Array parameters;
 
         /// <summary>
-        ///     Creates new QLambda instance with given body and parameters.
-        ///     Note that expression is trimmed and required to be enclosed in { and } brackets.
+        ///     Creates new QLambda instance with given body. Note that expression is trimmed and required to be enclosed
+        ///     in { and } brackets.
         /// </summary>
-        public QLambda(string expression, Array parameters = null)
+        public QLambda(string expression)
+            : base((byte)QType.Lambda)
         {
             if (expression == null)
             {
                 throw new ArgumentException("Lambda expression cannot be null");
             }
             expression = expression.Trim();
-            
+
             if (expression.Length == 0)
             {
                 throw new ArgumentException("Lambda expression cannot be empty");
             }
 
-            if (expression[0] != '{' || expression[expression.Length - 1] != '}')
+            if (!Regex.IsMatch(expression, LambdaRegex, RegexOptions.Compiled))
             {
-                throw new ArgumentException("Lambda expression is expected to be enclosed in {} brackets");
+                throw new ArgumentException("Invalid lambda expresion: " + expression);
             }
 
             this.expression = expression;
-            this.parameters = parameters;
         }
 
         /// <summary>
@@ -58,14 +60,6 @@ namespace qSharp
         public string Expression
         {
             get { return expression; }
-        }
-
-        /// <summary>
-        ///     Gets parameters of a q lambda expression.
-        /// </summary>
-        public Array Parameters
-        {
-            get { return parameters; }
         }
 
         /// <summary>
@@ -86,7 +80,7 @@ namespace qSharp
                 return false;
             }
 
-            return expression.Equals(l.expression) && Utils.ArrayEquals(parameters, l.parameters);
+            return expression.Equals(l.expression);
         }
 
         /// <summary>
@@ -101,7 +95,7 @@ namespace qSharp
                 return false;
             }
 
-            return expression.Equals(l.expression) && Utils.ArrayEquals(parameters, l.parameters);
+            return expression.Equals(l.expression);
         }
 
         /// <summary>
@@ -119,7 +113,7 @@ namespace qSharp
         /// <returns>A System.String that represents the current QLambda</returns>
         public override string ToString()
         {
-            return "QLambda: " + expression + (parameters == null ? "" : Utils.ArrayToString(parameters));
+            return "QLambda: " + expression;
         }
     }
 }

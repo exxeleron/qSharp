@@ -63,11 +63,22 @@ namespace qSharp
         SecondList = 18,
         Time = -19,
         TimeList = 19,
-        Lambda = 100,
-        LambdaPart = 104,
         Table = 98,
         KeyedTable = 99,
         Dictionary = 99,
+        Lambda = 100,
+        LambdaPart = 104,
+        Projection = 104,
+        UnaryPrimitiveFunc = 101,
+        BinaryPrimitiveFunc = 102,
+        TernaryOperatorFunc = 103,
+        CompositionFunc = 105,
+        AdverbFunc106 = 106,
+        AdverbFunc107 = 107,
+        AdverbFunc108 = 108,
+        AdverbFunc109 = 109,
+        AdverbFunc110 = 110,
+        AdverbFunc111 = 111,
     }
 
     /// <summary>
@@ -117,6 +128,7 @@ namespace qSharp
                 {typeof (QTime), QType.Time},
                 {typeof (QTime[]), QType.TimeList},
                 {typeof (QLambda), QType.Lambda},
+                {typeof (QProjection), QType.Projection},
                 {typeof (QException), QType.Error},
                 {typeof (QDictionary), QType.Dictionary},
                 {typeof (QTable), QType.Table},
@@ -163,7 +175,7 @@ namespace qSharp
                 {QType.Time, typeof (QTime)},
                 {QType.TimeList, typeof (QTime[])},
                 {QType.Lambda, typeof (QLambda)},
-                {QType.LambdaPart, typeof (QLambda)},
+                {QType.Projection, typeof (QProjection)},
                 {QType.Error, typeof (Exception)},
             };
 

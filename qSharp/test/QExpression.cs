@@ -122,7 +122,7 @@ namespace qSharp.test
                             {"12:04:59.123 0Nt", new[] {new QTime(43499123), new QTime(int.MinValue)}},
                             {"::", null},
                             {"{x+y}", new QLambda("{x+y}")},
-                            {"{x+y}[3]", new QLambda("{x+y}", new object[] {3})},
+                            {"{x+y}[3]", new QProjection( new object[]{new QLambda("{x+y}"), 3})},
                             {"(enlist `a)!(enlist 1)", new QDictionary(new[] {"a"}, new[] {1})},
                             {"1 2!`abc`cdefgh", new QDictionary(new[] {1, 2}, new[] {"abc", "cdefgh"})},
                             {
@@ -306,7 +306,7 @@ namespace qSharp.test
                             {"12:04:59.123 0Nt", new[] {new QTime(43499123), new QTime(int.MinValue)}},
                             {"::", null},
                             {"{x+y}", new QLambda("{x+y}")},
-                            {"{x+y}[3]", new QLambda("{x+y}", new object[] {(long) 3})},
+                            {"{x+y}[3]", new QProjection( new object[] {new QLambda("{x+y}"), (long) 3})},
                             {"(enlist `a)!(enlist 1)", new QDictionary(new[] {"a"}, new long[] {1})},
                             {"1 2!`abc`cdefgh", new QDictionary(new long[] {1, 2}, new[] {"abc", "cdefgh"})},
                                                         {

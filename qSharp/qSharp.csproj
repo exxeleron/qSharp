@@ -59,6 +59,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\QProjection.cs" />
+    <Compile Include="src\QFunction.cs" />
     <Compile Include="src\QBasicConnection.cs" />
     <Compile Include="src\QCallbackConnection.cs" />
     <Compile Include="src\QMessage.cs" />
@@ -98,6 +100,7 @@
     <None Include="test\QCompressedExpressions.out" />
     <None Include="test\QExpressions.3.out" />
     <None Include="test\QExpressions.out" />
+    <None Include="test\QExpressionsFunctions.out" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

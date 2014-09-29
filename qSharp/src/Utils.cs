@@ -81,7 +81,7 @@ namespace qSharp
                     continue;
                 }
 
-                if (lv == null || rv == null || lv.GetType() != rv.GetType())
+                if (lv == null || rv == null )
                 {
                     return false;
                 }
