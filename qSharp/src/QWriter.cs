@@ -177,6 +177,10 @@ namespace qSharp
                     writer.Write((byte)obj);
                     return;
                 case QType.Guid:
+                    if (protocolVersion < 3)
+                    {
+                        throw new QWriterException("kdb+ protocol version violation: guid not supported pre kdb+ v3.0");
+                    }
                     WriteGuid((Guid)obj);
                     return;
                 case QType.Short:
@@ -265,6 +269,10 @@ namespace qSharp
                     }
                 case QType.GuidList:
                     {
+                        if (protocolVersion < 3)
+                        {
+                            throw new QWriterException("kdb+ protocol version violation: guid not supported pre kdb+ v3.0");
+                        }
                         var _list = list as Guid[];
                         if (_list != null)
                             foreach (Guid a in _list)
