@@ -117,7 +117,7 @@
   <Target Name="BeforeBuild" Condition="Exists('$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets')">
     <Message Text="Version: $(major).$(minor).$(revision).$(build)" />
     <Attrib Files="$(MSBuildProjectDirectory)\Properties\AssemblyInfo.cs" Normal="true" />
-    <AssemblyInfo CodeLanguage="CS" OutputFile="$(MSBuildProjectDirectory)\Properties\AssemblyInfo.cs" AssemblyCompany="exxeleron" AssemblyTitle="qSharp" AssemblyProduct="qSharp" AssemblyCopyright="Copyright © exxeleron 2011-2014" AssemblyVersion="$(major).$(minor).$(revision).$(build)" AssemblyFileVersion="$(major).$(minor).$(revision).$(build)" />
+    <AssemblyInfo CodeLanguage="CS" OutputFile="$(MSBuildProjectDirectory)\Properties\AssemblyInfo.cs" AssemblyCompany="exxeleron" AssemblyTitle="qSharp" AssemblyProduct="qSharp" AssemblyCopyright="Copyright © exxeleron 2011-2015" AssemblyVersion="$(major).$(minor).$(revision).$(build)" AssemblyFileVersion="$(major).$(minor).$(revision).$(build)" />
   </Target>
   <Target Name="AfterBuild">
     <Exec Command="doxygen.exe doxygen.cfg" IgnoreExitCode="True" Condition="$(DOXYGEN_PATH) == ''" />

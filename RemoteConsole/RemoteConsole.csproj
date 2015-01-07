@@ -127,7 +127,7 @@
         AssemblyCompany="exxeleron" 
         AssemblyTitle="qSharp: RemoteConsole" 
         AssemblyProduct="qSharp" 
-        AssemblyCopyright="Copyright © exxeleron 2011-2014"
+        AssemblyCopyright="Copyright © exxeleron 2011-2015"
         AssemblyVersion="$(major).$(minor).$(revision).$(build)" 
         AssemblyFileVersion="$(major).$(minor).$(revision).$(build)" />
   </Target>
