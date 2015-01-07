@@ -239,7 +239,7 @@ namespace qSharp.Sample
         static void Main(string[] args)
         {
             QCallbackConnection q = new QCallbackConnection(host: (args.Length >= 1) ? args[0] : "localhost",
-                                                            port: (args.Length >= 2) ? Int32.Parse(args[1]) : 5000);
+                                                            port: (args.Length >= 2) ? Int32.Parse(args[1]) : 17010);
             try
             {
                 q.DataReceived += OnData;
@@ -248,14 +248,11 @@ namespace qSharp.Sample
                 Console.WriteLine("conn: " + q + "  protocol: " + q.ProtocolVersion);
                 Console.WriteLine("Press <ENTER> to close application");
 
-                q.Sync("sub:{[x] .sub.h: .z.w }");
-                q.Sync(".z.ts:{ (neg .sub.h) .z.p}");
-                q.Sync("value \"\\\\t 100\"");
-                q.StartListener();
-                q.Async("sub", 0);
+                Object response = q.Sync(".u.sub", "trade", ""); // subscribe to tick
+                QTable model = (QTable)((Object[])response)[1]; // get table model
 
+                q.StartListener();
                 Console.ReadLine();
-                q.Sync("value \"\\\\t 0\"");
                 q.StopListener();
             }
             catch (Exception e)
@@ -271,8 +268,20 @@ namespace qSharp.Sample
 
         static void OnData(object sender, QMessageEvent message)
         {
-            Console.WriteLine("Asynchronous message received: " + message.Message.Data);
-            Console.WriteLine("message type: " + message.Message.MessageType + " size: " + message.Message.MessageSize + " isCompressed: " + message.Message.Compressed + " endianess: " + message.Message.Endianess);
+            Object data = message.Message.Data;
+            if (data is Object[])
+            {
+                // unpack upd message
+                Object[] args = ((Object[])data);
+                if (args.Length == 3 && args[0].Equals("upd") && args[2] is QTable)
+                {
+                    QTable table = (QTable)args[2];
+                    foreach (QTable.Row row in table)
+                    {
+                        Console.WriteLine(row);
+                    }
+                }
+            }
         }
 
         static void OnError(object sender, QErrorEvent error)
