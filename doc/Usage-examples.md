@@ -295,6 +295,8 @@ namespace qSharp.Sample
 
 ### Data publisher
 This example shows how to stream data to the kdb+ process using standard tickerplant API:
+> :white_check_mark: Warning:
+> this sample code overwrites: .u.upd function on q process
 
 ```csharp
 using System;
@@ -316,6 +318,7 @@ namespace qSharp.Sample
             {
                 q.Open();
                 Console.WriteLine("conn: " + q + "  protocol: " + q.ProtocolVersion);
+                Console.WriteLine("WARNING: this application overwrites: .u.upd function on q process");
                 Console.WriteLine("Press <ENTER> to close application");
                 q.Sync(".u.upd:{[x;y] show (x;y)};");
 

@@ -33,6 +33,7 @@ namespace qSharp.Sample
             {
                 q.Open();
                 Console.WriteLine("conn: " + q + "  protocol: " + q.ProtocolVersion);
+                Console.WriteLine("WARNING: this application overwrites: .u.upd function on q process");
                 Console.WriteLine("Press <ENTER> to close application");
                 q.Sync(".u.upd:{[x;y] show (x;y)};");
 
