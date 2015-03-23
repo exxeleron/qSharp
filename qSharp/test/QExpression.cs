@@ -106,6 +106,7 @@ namespace qSharp.test
                             {"``quick``fox", new[] {"", "quick", "", "fox" }},
                             {"``", new[] {"", ""}},
                             {"(\"quick\"; \"brown\"; \"fox\"; \"jumps\"; \"over\"; \"a lazy\"; \"dog\")", new object[] {"quick".ToCharArray(), "brown".ToCharArray(), "fox".ToCharArray(), "jumps".ToCharArray(), "over".ToCharArray(), "a lazy".ToCharArray(), "dog".ToCharArray() }},
+                            {"(\"quick\"; \"brown\"; \"fox\")", new char[][] {"quick".ToCharArray(), "brown".ToCharArray(), "fox".ToCharArray() }},
                             {
                                 "2000.01.04D05:36:57.600 0Np",
                                 new[] {new QTimestamp(279417600000000), new QTimestamp(long.MinValue)}
@@ -290,6 +291,7 @@ namespace qSharp.test
                             {"``quick``fox", new[] {"", "quick", "", "fox" }},
                             {"``", new[] {"", ""}},
                             {"(\"quick\"; \"brown\"; \"fox\"; \"jumps\"; \"over\"; \"a lazy\"; \"dog\")", new object[] {"quick".ToCharArray(), "brown".ToCharArray(), "fox".ToCharArray(), "jumps".ToCharArray(), "over".ToCharArray(), "a lazy".ToCharArray(), "dog".ToCharArray() }},
+                            {"(\"quick\"; \"brown\"; \"fox\")", new char[][] {"quick".ToCharArray(), "brown".ToCharArray(), "fox".ToCharArray() }},
                             {
                                 "2000.01.04D05:36:57.600 0Np",
                                 new[] {new QTimestamp(279417600000000), new QTimestamp(long.MinValue)}
@@ -452,7 +454,15 @@ namespace qSharp.test
 
         public object GetReferenceObject(string version, string key)
         {
-            return reference[version][key];
+            try
+            {
+                return reference[version][key];
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(string.Format("Cannot retrieve key: {0}", key));
+                throw e;
+            }
         }
 
         private static byte[] StringToByteArray(String hex)

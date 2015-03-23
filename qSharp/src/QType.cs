@@ -109,6 +109,7 @@ namespace qSharp
                 {typeof (double[]), QType.DoubleList},
                 {typeof (char), QType.Char},
                 {typeof (char[]), QType.String},
+                {typeof (char[][]), QType.GeneralList},
                 {typeof (string), QType.Symbol},
                 {typeof (string[]), QType.SymbolList},
                 {typeof (QTimestamp), QType.Timestamp},
