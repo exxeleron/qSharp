@@ -15,7 +15,6 @@
 //
 
 using System;
-using System.Globalization;
 
 namespace qSharp
 {
@@ -25,8 +24,7 @@ namespace qSharp
     public struct QMinute : IDateTime
     {
         private const string NullRepresentation = "0Nu";
-
-        private DateTime datetime;
+        private DateTime _datetime;
 
         /// <summary>
         ///     Creates new QMinute instance using specified q minute value.
@@ -45,7 +43,7 @@ namespace qSharp
         public QMinute(DateTime datetime)
             : this()
         {
-            this.datetime = datetime;
+            this._datetime = datetime;
             Value = (int) datetime.TimeOfDay.TotalMinutes;
         }
 
@@ -64,11 +62,11 @@ namespace qSharp
         /// </summary>
         public DateTime ToDateTime()
         {
-            if (datetime == DateTime.MinValue)
+            if (_datetime == DateTime.MinValue)
             {
-                datetime = new DateTime().AddMinutes(Value);
+                _datetime = new DateTime().AddMinutes(Value);
             }
-            return datetime;
+            return _datetime;
         }
 
         /// <summary>
@@ -78,33 +76,33 @@ namespace qSharp
         {
             if (Value != int.MinValue)
             {
-                int minutes = Math.Abs(Value);
-                int hours = minutes / 60;
+                var minutes = Math.Abs(Value);
+                var hours = minutes/60;
 
-                return String.Format("{0}{1:00}:{2:00}", Value < 0 ? "-" : "", hours, minutes % 60);
+                return string.Format("{0}{1:00}:{2:00}", Value < 0 ? "-" : "", hours, minutes%60);
             }
             return NullRepresentation;
         }
 
         /// <summary>
-        /// Returns a QMinute represented by a given string.
+        ///     Returns a QMinute represented by a given string.
         /// </summary>
         /// <param name="date">string representation</param>
         /// <returns>a QMinute instance</returns>
         public static QMinute FromString(string date)
         {
-            if (date == null || date.Length == 0 || date.Equals(NullRepresentation))
+            if (string.IsNullOrWhiteSpace(date) || date.Equals(NullRepresentation))
             {
                 return new QMinute(int.MinValue);
             }
 
             try
             {
-                String[] parts = date.Split(':');
-                int hours = int.Parse(parts[0]);
-                int minutes = int.Parse(parts[1]);
+                var parts = date.Split(':');
+                var hours = int.Parse(parts[0]);
+                var minutes = int.Parse(parts[1]);
 
-                return new QMinute((minutes + 60 * Math.Abs(hours)) * (hours > 0 ? 1 : -1));
+                return new QMinute((minutes + 60*Math.Abs(hours))*(hours > 0 ? 1 : -1));
             }
             catch (Exception e)
             {
@@ -117,19 +115,14 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QMinute.</param>
         /// <returns>true if the specified System.Object is equal to the current QMinute; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             if (!(obj is QMinute))
             {
                 return false;
             }
 
-            return Value == ((QMinute)obj).Value;
+            return Value == ((QMinute) obj).Value;
         }
 
         public override int GetHashCode()

@@ -14,25 +14,22 @@
 //   limitations under the License.
 //
 
-using System;
-
 namespace qSharp
 {
     /// <summary>
     ///     Represents q function.
-    ///     
     ///     Note that the QFunction instances cannot be serialized to IPC protocol.
     /// </summary>
     public class QFunction
     {
-        private readonly byte qTypeCode;
+        private readonly byte _qTypeCode;
 
         /// <summary>
         ///     Creates representation of q function with given q type code.
         /// </summary>
         protected QFunction(byte qTypeCode)
         {
-            this.qTypeCode = qTypeCode;
+            _qTypeCode = qTypeCode;
         }
 
         /// <summary>
@@ -40,9 +37,8 @@ namespace qSharp
         /// </summary>
         public byte QTypeCode
         {
-            get { return qTypeCode; }
+            get { return _qTypeCode; }
         }
-
 
         /// <summary>
         ///     Returns a System.String that represents the current QFunction.
@@ -50,9 +46,8 @@ namespace qSharp
         /// <returns>A System.String that represents the current QFunction</returns>
         public override string ToString()
         {
-            return "QFunction#" + qTypeCode + "h";
+            return "QFunction#" + _qTypeCode + "h";
         }
-
 
         /// <summary>
         ///     Creates representation of q function with given q type code.

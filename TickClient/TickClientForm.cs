@@ -15,19 +15,13 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace qSharp.Sample
 {
     public partial class TickClientForm : Form
     {
-        QCallbackConnection q;
+        private QCallbackConnection q;
 
         public TickClientForm()
         {
@@ -38,20 +32,20 @@ namespace qSharp.Sample
         {
             if (q == null)
             {
-                string[] conn = qhostTB.Text.Split(':');
-                q = new QCallbackConnection(host: conn.Length >= 1 ? conn[0] : "localhost",
-                                            port: conn.Length >= 2 ? int.Parse(conn[1]) : 5010);
+                var conn = qhostTB.Text.Split(':');
+                q = new QCallbackConnection(conn.Length >= 1 ? conn[0] : "localhost",
+                    conn.Length >= 2 ? int.Parse(conn[1]) : 5010);
 
                 try
                 {
                     q.Open();
-                    QTable model = (QTable)((object[])q.Sync(".u.sub", qtableTB.Text, ""))[1];
+                    var model = (QTable) ((object[]) q.Sync(".u.sub", qtableTB.Text, ""))[1];
                     data.Columns.Clear();
-                    foreach(string column in model.Columns)
+                    foreach (var column in model.Columns)
                     {
                         data.Columns.Add(column);
                     }
-                    
+
                     q.DataReceived += OnData;
                 }
                 catch (Exception e1)
@@ -74,38 +68,38 @@ namespace qSharp.Sample
 
         private void OnData(object sender, QMessageEvent message)
         {
-            Object[] list = message.Message.Data as object[];
+            var list = message.Message.Data as object[];
             if (list != null && list.Length == 3 && list[0].Equals("upd") && list[2] is QTable)
             {
-                QTable table = list[2] as QTable;
-                string[] buffer = new string[table.ColumnsCount];
+                var table = list[2] as QTable;
+                var buffer = new string[table.ColumnsCount];
                 object item;
                 foreach (QTable.Row row in table)
                 {
-                    for (int i = 0; i < table.ColumnsCount; i++)
+                    for (var i = 0; i < table.ColumnsCount; i++)
                     {
                         item = row[i];
                         buffer[i] = item != null ? item.ToString() : "";
                     }
 
-                    this.AddItem(buffer);
+                    AddItem(buffer);
                 }
             }
         }
 
-        delegate void AddItemCallback(string[] item);
-
         private void AddItem(string[] item)
         {
-            if (this.data.InvokeRequired)
+            if (data.InvokeRequired)
             {
-                AddItemCallback d = new AddItemCallback(AddItem);
-                this.Invoke(d, new object[] { item });
+                AddItemCallback d = AddItem;
+                Invoke(d, new object[] {item});
             }
             else
             {
                 data.Items.Insert(0, new ListViewItem(item));
             }
         }
+
+        private delegate void AddItemCallback(string[] item);
     }
 }

@@ -35,12 +35,12 @@ namespace qSharp
                 return "[]";
             }
             var values = new string[list.Length];
-            for (int i = 0; i < list.Length; i++)
+            for (var i = 0; i < list.Length; i++)
             {
-                object obj = list.GetValue(i);
+                var obj = list.GetValue(i);
                 values[i] = obj == null
-                                ? null
-                                : obj.GetType().IsArray ? ArrayToString(obj as Array) : obj.ToString();
+                    ? null
+                    : obj.GetType().IsArray ? ArrayToString(obj as Array) : obj.ToString();
             }
             return "[" + string.Join("; ", values) + "]";
         }
@@ -71,17 +71,17 @@ namespace qSharp
                 return false;
             }
 
-            for (int i = 0; i < l.Length; i++)
+            for (var i = 0; i < l.Length; i++)
             {
-                object lv = l.GetValue(i);
-                object rv = r.GetValue(i);
+                var lv = l.GetValue(i);
+                var rv = r.GetValue(i);
 
                 if (lv == rv || lv == null && rv == null)
                 {
                     continue;
                 }
 
-                if (lv == null || rv == null )
+                if (lv == null || rv == null)
                 {
                     return false;
                 }

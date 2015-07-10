@@ -26,31 +26,30 @@ namespace qSharp
     internal sealed class EndianBinaryReader
     {
         /// order of uid read/write
-        private static readonly int[] guidByteOrder = { 3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15 };
+        private static readonly int[] GuidByteOrder = {3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15};
 
-        private readonly byte[] rawData;
-
-        private ByteConverter byteConverter;
-        private Endianess endianess;
+        private readonly byte[] _rawData;
+        private ByteConverter _byteConverter;
+        private Endianess _endianess;
 
         public EndianBinaryReader(byte[] rawData, Endianess endianess = Endianess.LittleEndian)
         {
-            this.rawData = rawData;
+            _rawData = rawData;
             Position = 0;
             Endianess = endianess;
         }
 
         public Endianess Endianess
         {
-            get { return endianess; }
+            get { return _endianess; }
 
             set
             {
-                endianess = value;
+                _endianess = value;
                 if (value == Endianess.LittleEndian)
-                    byteConverter = FromLittleEndian;
+                    _byteConverter = FromLittleEndian;
                 else
-                    byteConverter = FromBigEndian;
+                    _byteConverter = FromBigEndian;
             }
         }
 
@@ -58,36 +57,36 @@ namespace qSharp
 
         public bool ReadBoolean()
         {
-            return rawData[Position++] == 1;
+            return _rawData[Position++] == 1;
         }
 
         public byte ReadByte()
         {
-            return rawData[Position++];
+            return _rawData[Position++];
         }
 
         public sbyte ReadSByte()
         {
-            return unchecked((sbyte)rawData[Position++]);
+            return unchecked((sbyte) _rawData[Position++]);
         }
 
         public short ReadInt16()
         {
-            var ret = unchecked((short)(byteConverter(rawData, Position, 2)));
+            var ret = unchecked((short) (_byteConverter(_rawData, Position, 2)));
             Position += 2;
             return ret;
         }
 
         public int ReadInt32()
         {
-            var ret = unchecked((int)(byteConverter(rawData, Position, 4)));
+            var ret = unchecked((int) (_byteConverter(_rawData, Position, 4)));
             Position += 4;
             return ret;
         }
 
         public long ReadInt64()
         {
-            long ret = unchecked((byteConverter(rawData, Position, 8)));
+            var ret = unchecked((_byteConverter(_rawData, Position, 8)));
             Position += 8;
             return ret;
         }
@@ -104,13 +103,13 @@ namespace qSharp
 
         public char ReadChar()
         {
-            return (char)(ReadByte() & 0xFF);
+            return (char) (ReadByte() & 0xFF);
         }
 
         public byte[] ReadBytes(int count)
         {
             var bytes = new byte[count];
-            Array.Copy(rawData, Position, bytes, 0, count);
+            Array.Copy(_rawData, Position, bytes, 0, count);
             Position += count;
             return bytes;
         }
@@ -118,9 +117,9 @@ namespace qSharp
         public Guid ReadGuid()
         {
             var b = new byte[16];
-            for (int j = 0; j < 16; j++)
+            for (var j = 0; j < 16; j++)
             {
-                b[guidByteOrder[j]] = ReadByte();
+                b[GuidByteOrder[j]] = ReadByte();
             }
             return new Guid(b);
         }
@@ -128,18 +127,18 @@ namespace qSharp
         public string ReadString(int count, Encoding encoding)
         {
             Position += count;
-            return encoding.GetString(rawData, Position - count, count);
+            return encoding.GetString(_rawData, Position - count, count);
         }
 
         public string ReadSymbol(Encoding encoding)
         {
-            int i = Position;
-            for (; rawData[i] != 0; ++i)
+            var i = Position;
+            for (; _rawData[i] != 0; ++i)
             {
             } //empty
-            int count = i - Position;
+            var count = i - Position;
 
-            var symbol = encoding.GetString(rawData, Position, count);
+            var symbol = encoding.GetString(_rawData, Position, count);
             Position += count + 1;
             return symbol;
         }
@@ -147,7 +146,7 @@ namespace qSharp
         public static long FromLittleEndian(byte[] buffer, int startIndex, int bytesToConvert)
         {
             long ret = 0;
-            for (int i = 0; i < bytesToConvert; i++)
+            for (var i = 0; i < bytesToConvert; i++)
             {
                 ret = unchecked((ret << 8) | buffer[startIndex + bytesToConvert - 1 - i]);
             }
@@ -157,7 +156,7 @@ namespace qSharp
         public static long FromBigEndian(byte[] buffer, int startIndex, int bytesToConvert)
         {
             long ret = 0;
-            for (int i = 0; i < bytesToConvert; i++)
+            for (var i = 0; i < bytesToConvert; i++)
             {
                 ret = unchecked((ret << 8) | buffer[startIndex + i]);
             }
@@ -175,7 +174,7 @@ namespace qSharp
                     Position = position;
                     break;
                 case SeekOrigin.End:
-                    Position = rawData.Length - position;
+                    Position = _rawData.Length - position;
                     break;
             }
         }

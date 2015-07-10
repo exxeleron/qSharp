@@ -33,18 +33,6 @@ namespace qSharp.test
         }
 
         [Test]
-        public void testQDateToString()
-        {
-            Assert.AreEqual("1995.07.01", new QDate(-1645).ToString());
-            Assert.AreEqual("1999.01.01", new QDate(-365).ToString());
-            Assert.AreEqual("2000.01.01", new QDate(0).ToString());
-            Assert.AreEqual("2005.07.01", new QDate(2008).ToString());
-            Assert.AreEqual("2010.01.01", new QDate(3653).ToString());
-
-            Assert.AreEqual("0Nd", new QDate(int.MinValue).ToString());
-        }
-
-        [Test]
         public void testQDateFromString()
         {
             Assert.AreEqual(new QDate(-1645), QDate.FromString("1995.07.01"));
@@ -61,10 +49,26 @@ namespace qSharp.test
         [Test]
         public void TestQDateTime()
         {
-            Assert.AreEqual(-364.0000116, new QDateTime(new DateTime(1999, 1, 1, 23, 59, 59)).Value, delta: 0.1);
+            Assert.AreEqual(-364.0000116, new QDateTime(new DateTime(1999, 1, 1, 23, 59, 59)).Value, 0.1);
             Assert.AreEqual(0, new QDateTime(new DateTime(2000, 1, 1)).Value);
-            Assert.AreEqual(2008.0833218, new QDateTime(new DateTime(2005, 7, 1, 1, 59, 59)).Value, delta: 0.1);
-            Assert.AreEqual(3653.5, new QDateTime(new DateTime(2010, 1, 1, 14, 23, 42)).Value, delta: 0.1);
+            Assert.AreEqual(2008.0833218, new QDateTime(new DateTime(2005, 7, 1, 1, 59, 59)).Value, 0.1);
+            Assert.AreEqual(3653.5, new QDateTime(new DateTime(2010, 1, 1, 14, 23, 42)).Value, 0.1);
+        }
+
+        [Test]
+        public void testQDateTimeFromString()
+        {
+            Assert.AreEqual(new QDateTime(-364.0000115).Value, QDateTime.FromString("1999.01.01T23:59:59.000").Value,
+                0.001);
+            Assert.AreEqual(new QDateTime(0.0).Value, QDateTime.FromString("2000.01.01T00:00:00.000").Value, 0.001);
+            Assert.AreEqual(new QDateTime(2008.0833218).Value, QDateTime.FromString("2005.07.01T01:59:59.000").Value,
+                0.001);
+            Assert.AreEqual(new QDateTime(3653.599792).Value, QDateTime.FromString("2010.01.01T14:23:42.000").Value,
+                0.001);
+
+            Assert.AreEqual(new QDateTime(double.NaN), QDateTime.FromString(null));
+            Assert.AreEqual(new QDateTime(double.NaN), QDateTime.FromString(""));
+            Assert.AreEqual(new QDateTime(double.NaN), QDateTime.FromString("0Nz"));
         }
 
         [Test]
@@ -75,20 +79,19 @@ namespace qSharp.test
             Assert.AreEqual("2005.07.01T01:59:59.004", new QDateTime(2008.0833218).ToString());
             Assert.AreEqual("2010.01.01T14:23:42.029", new QDateTime(3653.599792).ToString());
 
-            Assert.AreEqual("0Nz", new QDateTime(Double.NaN).ToString());
+            Assert.AreEqual("0Nz", new QDateTime(double.NaN).ToString());
         }
 
         [Test]
-        public void testQDateTimeFromString()
+        public void testQDateToString()
         {
-            Assert.AreEqual(new QDateTime(-364.0000115).Value, QDateTime.FromString("1999.01.01T23:59:59.000").Value, 0.001);
-            Assert.AreEqual(new QDateTime(0.0).Value, QDateTime.FromString("2000.01.01T00:00:00.000").Value, 0.001);
-            Assert.AreEqual(new QDateTime(2008.0833218).Value, QDateTime.FromString("2005.07.01T01:59:59.000").Value, 0.001);
-            Assert.AreEqual(new QDateTime(3653.599792).Value, QDateTime.FromString("2010.01.01T14:23:42.000").Value, 0.001);
+            Assert.AreEqual("1995.07.01", new QDate(-1645).ToString());
+            Assert.AreEqual("1999.01.01", new QDate(-365).ToString());
+            Assert.AreEqual("2000.01.01", new QDate(0).ToString());
+            Assert.AreEqual("2005.07.01", new QDate(2008).ToString());
+            Assert.AreEqual("2010.01.01", new QDate(3653).ToString());
 
-            Assert.AreEqual(new QDateTime(Double.NaN), QDateTime.FromString(null));
-            Assert.AreEqual(new QDateTime(Double.NaN), QDateTime.FromString(""));
-            Assert.AreEqual(new QDateTime(Double.NaN), QDateTime.FromString("0Nz"));
+            Assert.AreEqual("0Nd", new QDate(int.MinValue).ToString());
         }
 
         [Test]
@@ -97,19 +100,6 @@ namespace qSharp.test
             Assert.AreEqual(0, new QMinute(new DateTime(2000, 1, 1)).Value);
             Assert.AreEqual(810, new QMinute(new DateTime(2000, 1, 1, 13, 30, 13)).Value);
             Assert.AreEqual(1439, new QMinute(new DateTime(2000, 1, 1, 23, 59, 59)).Value);
-        }
-
-        [Test]
-        public void testQMinuteToString()
-        {
-            Assert.AreEqual("00:00", new QMinute(0).ToString());
-            Assert.AreEqual("13:30", new QMinute(810).ToString());
-            Assert.AreEqual("23:59", new QMinute(1439).ToString());
-
-            Assert.AreEqual("-13:30", new QMinute(-810).ToString());
-            Assert.AreEqual("52:23", new QMinute(3143).ToString());
-
-            Assert.AreEqual("0Nu", new QMinute(int.MinValue).ToString());
         }
 
         [Test]
@@ -128,6 +118,19 @@ namespace qSharp.test
         }
 
         [Test]
+        public void testQMinuteToString()
+        {
+            Assert.AreEqual("00:00", new QMinute(0).ToString());
+            Assert.AreEqual("13:30", new QMinute(810).ToString());
+            Assert.AreEqual("23:59", new QMinute(1439).ToString());
+
+            Assert.AreEqual("-13:30", new QMinute(-810).ToString());
+            Assert.AreEqual("52:23", new QMinute(3143).ToString());
+
+            Assert.AreEqual("0Nu", new QMinute(int.MinValue).ToString());
+        }
+
+        [Test]
         public void TestQMonth()
         {
             Assert.AreEqual(-60, new QMonth(new DateTime(1995, 1, 1)).Value);
@@ -135,18 +138,6 @@ namespace qSharp.test
             Assert.AreEqual(0, new QMonth(new DateTime(2000, 1, 1)).Value);
             Assert.AreEqual(66, new QMonth(new DateTime(2005, 7, 1)).Value);
             Assert.AreEqual(120, new QMonth(new DateTime(2010, 1, 1)).Value);
-        }
-
-        [Test]
-        public void testQMonthToString()
-        {
-            Assert.AreEqual("1995.01m", new QMonth(-60).ToString());
-            Assert.AreEqual("1995.07m", new QMonth(-54).ToString());
-            Assert.AreEqual("2000.01m", new QMonth(0).ToString());
-            Assert.AreEqual("2005.07m", new QMonth(66).ToString());
-            Assert.AreEqual("2010.01m", new QMonth(120).ToString());
-
-            Assert.AreEqual("0Nm", new QMonth(int.MinValue).ToString());
         }
 
         [Test]
@@ -164,24 +155,23 @@ namespace qSharp.test
         }
 
         [Test]
+        public void testQMonthToString()
+        {
+            Assert.AreEqual("1995.01m", new QMonth(-60).ToString());
+            Assert.AreEqual("1995.07m", new QMonth(-54).ToString());
+            Assert.AreEqual("2000.01m", new QMonth(0).ToString());
+            Assert.AreEqual("2005.07m", new QMonth(66).ToString());
+            Assert.AreEqual("2010.01m", new QMonth(120).ToString());
+
+            Assert.AreEqual("0Nm", new QMonth(int.MinValue).ToString());
+        }
+
+        [Test]
         public void TestQSecond()
         {
             Assert.AreEqual(0, new QSecond(new DateTime(2000, 1, 1)).Value);
             Assert.AreEqual(48613L, new QSecond(new DateTime(2000, 1, 1, 13, 30, 13)).Value);
             Assert.AreEqual(86399L, new QSecond(new DateTime(2000, 1, 1, 23, 59, 59)).Value);
-        }
-
-        [Test]
-        public void testQSecondToString()
-        {
-            Assert.AreEqual("00:00:00", new QSecond(0).ToString());
-            Assert.AreEqual("13:30:13", new QSecond(48613).ToString());
-            Assert.AreEqual("23:59:59", new QSecond(86399).ToString());
-
-            Assert.AreEqual("51:46:39", new QSecond(186399).ToString());
-            Assert.AreEqual("-23:59:59", new QSecond(-86399).ToString());
-
-            Assert.AreEqual("0Nv", new QSecond(int.MinValue).ToString());
         }
 
         [Test]
@@ -200,24 +190,24 @@ namespace qSharp.test
         }
 
         [Test]
+        public void testQSecondToString()
+        {
+            Assert.AreEqual("00:00:00", new QSecond(0).ToString());
+            Assert.AreEqual("13:30:13", new QSecond(48613).ToString());
+            Assert.AreEqual("23:59:59", new QSecond(86399).ToString());
+
+            Assert.AreEqual("51:46:39", new QSecond(186399).ToString());
+            Assert.AreEqual("-23:59:59", new QSecond(-86399).ToString());
+
+            Assert.AreEqual("0Nv", new QSecond(int.MinValue).ToString());
+        }
+
+        [Test]
         public void TestQTime()
         {
             Assert.AreEqual(0, new QTime(new DateTime(2000, 1, 1)).Value);
             Assert.AreEqual(48613000L, new QTime(new DateTime(2000, 1, 1, 13, 30, 13)).Value);
             Assert.AreEqual(86399000L, new QTime(new DateTime(2000, 1, 1, 23, 59, 59)).Value);
-        }
-
-        [Test]
-        public void testQTimeToString()
-        {
-            Assert.AreEqual("00:00:00.000", new QTime(0).ToString());
-            Assert.AreEqual("13:30:13.000", new QTime(48613000).ToString());
-            Assert.AreEqual("23:59:59.000", new QTime(86399000).ToString());
-
-            Assert.AreEqual("51:46:39.050", new QTime(186399050).ToString());
-            Assert.AreEqual("-23:59:59.100", new QTime(-86399100).ToString());
-
-            Assert.AreEqual("0Nt", new QTime(int.MinValue).ToString());
         }
 
         [Test]
@@ -244,21 +234,6 @@ namespace qSharp.test
         }
 
         [Test]
-        public void testQTimespanToString()
-        {
-            Assert.AreEqual("0D00:00:00.000000000", new QTimespan(0L).ToString());
-            Assert.AreEqual("0D13:30:13.000000000", new QTimespan(48613000000000L).ToString());
-            Assert.AreEqual("0D13:30:13.000000100", new QTimespan(48613000000100L).ToString());
-            Assert.AreEqual("-0D13:30:13.000001000", new QTimespan(-48613000001000L).ToString());
-            Assert.AreEqual("1D13:30:13.000000000", new QTimespan(135013000000000L).ToString());
-            Assert.AreEqual("0D23:59:59.000000000", new QTimespan(86399000000000L).ToString());
-            Assert.AreEqual("2D23:59:59.000000000", new QTimespan(259199000000000L).ToString());
-            Assert.AreEqual("-2D23:59:59.000000000", new QTimespan(-259199000000000L).ToString());
-
-            Assert.AreEqual("0Nn", new QTimespan(long.MinValue).ToString());
-        }
-
-        [Test]
         public void testQTimespanFromString()
         {
             Assert.AreEqual(new QTimespan(0L), QTimespan.FromString("0D00:00:00.000000000"));
@@ -277,6 +252,21 @@ namespace qSharp.test
         }
 
         [Test]
+        public void testQTimespanToString()
+        {
+            Assert.AreEqual("0D00:00:00.000000000", new QTimespan(0L).ToString());
+            Assert.AreEqual("0D13:30:13.000000000", new QTimespan(48613000000000L).ToString());
+            Assert.AreEqual("0D13:30:13.000000100", new QTimespan(48613000000100L).ToString());
+            Assert.AreEqual("-0D13:30:13.000001000", new QTimespan(-48613000001000L).ToString());
+            Assert.AreEqual("1D13:30:13.000000000", new QTimespan(135013000000000L).ToString());
+            Assert.AreEqual("0D23:59:59.000000000", new QTimespan(86399000000000L).ToString());
+            Assert.AreEqual("2D23:59:59.000000000", new QTimespan(259199000000000L).ToString());
+            Assert.AreEqual("-2D23:59:59.000000000", new QTimespan(-259199000000000L).ToString());
+
+            Assert.AreEqual("0Nn", new QTimespan(long.MinValue).ToString());
+        }
+
+        [Test]
         public void TestQTimestamp()
         {
             Assert.AreEqual(-142079387000000000L, new QTimestamp(new DateTime(1995, 7, 1, 13, 30, 13)).Value);
@@ -284,6 +274,20 @@ namespace qSharp.test
             Assert.AreEqual(0, new QTimestamp(new DateTime(2000, 1, 1)).Value);
             Assert.AreEqual(173498399000000000L, new QTimestamp(new DateTime(2005, 7, 1, 1, 59, 59)).Value);
             Assert.AreEqual(315671022000000000L, new QTimestamp(new DateTime(2010, 1, 1, 14, 23, 42)).Value);
+        }
+
+        [Test]
+        public void testQTimestampFromString()
+        {
+            Assert.AreEqual(new QTimestamp(-142079387000000000L), QTimestamp.FromString("1995.07.01D13:30:13.000000000"));
+            Assert.AreEqual(new QTimestamp(-31449601000000000L), QTimestamp.FromString("1999.01.01D23:59:59.000000000"));
+            Assert.AreEqual(new QTimestamp(0L), QTimestamp.FromString("2000.01.01D00:00:00.000000000"));
+            Assert.AreEqual(new QTimestamp(173498399000000012L), QTimestamp.FromString("2005.07.01D01:59:59.000000012"));
+            Assert.AreEqual(new QTimestamp(315671022000000066L), QTimestamp.FromString("2010.01.01D14:23:42.000000066"));
+
+            Assert.AreEqual(new QTimestamp(long.MinValue), QTimestamp.FromString(null));
+            Assert.AreEqual(new QTimestamp(long.MinValue), QTimestamp.FromString(""));
+            Assert.AreEqual(new QTimestamp(long.MinValue), QTimestamp.FromString("0Np"));
         }
 
         [Test]
@@ -299,17 +303,16 @@ namespace qSharp.test
         }
 
         [Test]
-        public void testQTimestampFromString()
+        public void testQTimeToString()
         {
-            Assert.AreEqual(new QTimestamp(-142079387000000000L), QTimestamp.FromString("1995.07.01D13:30:13.000000000"));
-            Assert.AreEqual(new QTimestamp(-31449601000000000L), QTimestamp.FromString("1999.01.01D23:59:59.000000000"));
-            Assert.AreEqual(new QTimestamp(0L), QTimestamp.FromString("2000.01.01D00:00:00.000000000"));
-            Assert.AreEqual(new QTimestamp(173498399000000012L), QTimestamp.FromString("2005.07.01D01:59:59.000000012"));
-            Assert.AreEqual(new QTimestamp(315671022000000066L), QTimestamp.FromString("2010.01.01D14:23:42.000000066"));
+            Assert.AreEqual("00:00:00.000", new QTime(0).ToString());
+            Assert.AreEqual("13:30:13.000", new QTime(48613000).ToString());
+            Assert.AreEqual("23:59:59.000", new QTime(86399000).ToString());
 
-            Assert.AreEqual(new QTimestamp(long.MinValue), QTimestamp.FromString(null));
-            Assert.AreEqual(new QTimestamp(long.MinValue), QTimestamp.FromString(""));
-            Assert.AreEqual(new QTimestamp(long.MinValue), QTimestamp.FromString("0Np"));
+            Assert.AreEqual("51:46:39.050", new QTime(186399050).ToString());
+            Assert.AreEqual("-23:59:59.100", new QTime(-86399100).ToString());
+
+            Assert.AreEqual("0Nt", new QTime(int.MinValue).ToString());
         }
     }
 }

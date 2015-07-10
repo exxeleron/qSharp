@@ -24,11 +24,10 @@ namespace qSharp
     /// <summary>
     ///     Represents a q table type.
     /// </summary>
-    public sealed class QTable : IEnumerable
+    public sealed class QTable : IEnumerable, IQTable
     {
-        private readonly string[] columns;
-        private readonly ListDictionary columnsMap;
-        private Array data;
+        private readonly string[] _columns;
+        private readonly ListDictionary _columnsMap;
 
         /// <summary>
         ///     Initializes a new instance of the QTable with specified column names and data matrix.
@@ -55,15 +54,15 @@ namespace qSharp
                 throw new ArgumentException("Non array column found in data matrix");
             }
 
-            columnsMap = new ListDictionary();
-            for (int i = 0; i < columns.Length; i++)
+            _columnsMap = new ListDictionary();
+            for (var i = 0; i < columns.Length; i++)
             {
-                columnsMap[columns[i]] = i;
+                _columnsMap[columns[i]] = i;
             }
 
-            this.columns = columns;
-            this.data = data;
-            RowsCount = ((Array)data.GetValue(0)).Length;
+            _columns = columns;
+            Data = data;
+            RowsCount = ((Array) data.GetValue(0)).Length;
         }
 
         /// <summary>
@@ -84,16 +83,13 @@ namespace qSharp
         /// </summary>
         public string[] Columns
         {
-            get { return columns; }
+            get { return _columns; }
         }
 
         /// <summary>
         ///     Gets a data matrix in current QTable.
         /// </summary>
-        public Array Data
-        {
-            get { return data; }
-        }
+        public Array Data { get; private set; }
 
         /// <summary>
         ///     Gets a row of data from current QTable.
@@ -121,7 +117,7 @@ namespace qSharp
         /// <returns>0 based column index</returns>
         public int GetColumnIndex(string column)
         {
-            return (int)columnsMap[column];
+            return (int) _columnsMap[column];
         }
 
         /// <summary>
@@ -129,13 +125,8 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QTable.</param>
         /// <returns>true if the specified System.Object is equal to the current QTable; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             var t = obj as QTable;
             if (t == null)
             {
@@ -147,7 +138,7 @@ namespace qSharp
 
         public override int GetHashCode()
         {
-            return 31 * Columns.GetHashCode() + Data.GetHashCode();
+            return 31*Columns.GetHashCode() + Data.GetHashCode();
         }
 
         /// <summary>
@@ -240,8 +231,8 @@ namespace qSharp
             /// <returns>object</returns>
             public object this[int index]
             {
-                get { return ((Array)_table.data.GetValue(index)).GetValue(_rowIndex); }
-                set { ((Array)_table.data.GetValue(index)).SetValue(value, _rowIndex); }
+                get { return ((Array) _table.Data.GetValue(index)).GetValue(_rowIndex); }
+                set { ((Array) _table.Data.GetValue(index)).SetValue(value, _rowIndex); }
             }
 
             /// <summary>
@@ -259,10 +250,10 @@ namespace qSharp
             /// <returns>object[] with copy of entire row</returns>
             public object[] ToArray()
             {
-                int length = Length;
+                var length = Length;
                 var row = new object[length];
 
-                for (int i = 0; i < length; i++)
+                for (var i = 0; i < length; i++)
                 {
                     row[i] = this[i];
                 }

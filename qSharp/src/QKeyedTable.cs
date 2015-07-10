@@ -24,10 +24,10 @@ namespace qSharp
     /// <summary>
     ///     Represents a q keyed table type.
     /// </summary>
-    public sealed class QKeyedTable : IEnumerable
+    public sealed class QKeyedTable : IEnumerable, IQTable
     {
-        private readonly QTable keys;
-        private readonly QTable values;
+        private readonly QTable _keys;
+        private readonly QTable _values;
 
         /// <summary>
         ///     Creates new QKeyedTable instance with given keys and values arrays.
@@ -49,21 +49,21 @@ namespace qSharp
                 throw new ArgumentException("Keys and value tables cannot have different length");
             }
 
-            this.keys = keys;
-            this.values = values;
+            _keys = keys;
+            _values = values;
         }
 
         /// <summary>
         ///     Initializes a new instance of the QKeyedTable with specified column names and data matrix.
         /// </summary>
-        public QKeyedTable(string[] columns, string[] keyColumns, Array data)
+        public QKeyedTable(IList<string> columns, ICollection<string> keyColumns, Array data)
         {
-            if (columns == null || columns.Length == 0)
+            if (columns == null || columns.Count == 0)
             {
                 throw new ArgumentException("Columns array cannot be null or 0-length");
             }
 
-            if (keyColumns == null || keyColumns.Length == 0)
+            if (keyColumns == null || keyColumns.Count == 0)
             {
                 throw new ArgumentException("Key columns array cannot be null or 0-length");
             }
@@ -73,7 +73,7 @@ namespace qSharp
                 throw new ArgumentException("Data matrix cannot be null or 0-length");
             }
 
-            if (columns.Length != data.Length)
+            if (columns.Count != data.Length)
             {
                 throw new ArgumentException("Columns array and data matrix cannot have different length");
             }
@@ -89,7 +89,7 @@ namespace qSharp
             }
 
             var keyIndices = new SortedSet<int>();
-            for (int i = 0; i < columns.Length; i++)
+            for (var i = 0; i < columns.Count; i++)
             {
                 if (keyColumns.Contains(columns[i]))
                 {
@@ -102,10 +102,10 @@ namespace qSharp
             var dataArrays = new object[data.Length - keyIndices.Count];
             var dataHeaders = new string[data.Length - keyIndices.Count];
 
-            int ki = 0;
-            int di = 0;
+            var ki = 0;
+            var di = 0;
 
-            for (int i = 0; i < data.Length; i++)
+            for (var i = 0; i < data.Length; i++)
             {
                 if (keyIndices.Contains(i))
                 {
@@ -119,8 +119,8 @@ namespace qSharp
                 }
             }
 
-            keys = new QTable(keyHeaders, keyArrays);
-            values = new QTable(dataHeaders, dataArrays);
+            _keys = new QTable(keyHeaders, keyArrays);
+            _values = new QTable(dataHeaders, dataArrays);
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace qSharp
         /// </summary>
         public QTable Keys
         {
-            get { return keys; }
+            get { return _keys; }
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace qSharp
         /// </summary>
         public QTable Values
         {
-            get { return values; }
+            get { return _values; }
         }
 
         /// <summary>
@@ -153,13 +153,8 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QKeyedTable.</param>
         /// <returns>true if the specified System.Object is equal to the current QKeyedTable; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             var kt = obj as QKeyedTable;
             if (kt == null)
             {
@@ -201,7 +196,7 @@ namespace qSharp
         /// <summary>
         ///     Defines a key/value pair that can be retrieved.
         /// </summary>
-        public struct KeyValuePair
+        private struct KeyValuePair
         {
             private readonly int _index;
             private readonly QKeyedTable _kt;
@@ -220,7 +215,7 @@ namespace qSharp
             /// </summary>
             public object Key
             {
-                get { return _kt.keys[_index]; }
+                get { return _kt._keys[_index]; }
             }
 
             /// <summary>
@@ -228,7 +223,7 @@ namespace qSharp
             /// </summary>
             public object Value
             {
-                get { return _kt.values[_index]; }
+                get { return _kt._values[_index]; }
             }
         }
 
@@ -253,13 +248,23 @@ namespace qSharp
             public bool MoveNext()
             {
                 _index++;
-                return _index < _kt.keys.RowsCount;
+                return _index < _kt._keys.RowsCount;
             }
 
             public void Reset()
             {
                 _index = -1;
             }
+        }
+
+        public int RowsCount
+        {
+            get { return _keys.RowsCount; }
+        }
+
+        public int ColumnsCount
+        {
+            get { return _keys.ColumnsCount + _values.ColumnsCount; }
         }
     }
 }

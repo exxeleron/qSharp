@@ -17,7 +17,6 @@
 using System;
 using System.Globalization;
 
-
 namespace qSharp
 {
     /// <summary>
@@ -27,8 +26,7 @@ namespace qSharp
     {
         private const string DateFormat = "yyyy.MM.dd";
         private const string NullRepresentation = "0Nd";
-
-        private DateTime datetime;
+        private DateTime _datetime;
 
         /// <summary>
         ///     Creates new QDate instance using specified q date value.
@@ -47,8 +45,8 @@ namespace qSharp
         public QDate(DateTime datetime)
             : this()
         {
-            this.datetime = datetime;
-            Value = (int)(datetime - QTypes.QEpoch).TotalDays;
+            this._datetime = datetime;
+            Value = (int) (datetime - QTypes.QEpoch).TotalDays;
         }
 
         public int Value { get; private set; }
@@ -66,11 +64,11 @@ namespace qSharp
         /// </summary>
         public DateTime ToDateTime()
         {
-            if (datetime == DateTime.MinValue)
+            if (_datetime == DateTime.MinValue)
             {
-                datetime = new DateTime(2000, 1, 1).AddDays(Value);
+                _datetime = new DateTime(2000, 1, 1).AddDays(Value);
             }
-            return datetime;
+            return _datetime;
         }
 
         /// <summary>
@@ -86,7 +84,7 @@ namespace qSharp
         }
 
         /// <summary>
-        /// Returns a QDate represented by a given string.
+        ///     Returns a QDate represented by a given string.
         /// </summary>
         /// <param name="date">string representation</param>
         /// <returns>a QDate instance</returns>
@@ -94,7 +92,9 @@ namespace qSharp
         {
             try
             {
-                return date == null || date.Length == 0 || date.Equals(NullRepresentation) ? new QDate(int.MinValue) : new QDate(DateTime.ParseExact(date, DateFormat, CultureInfo.InvariantCulture));
+                return date == null || date.Length == 0 || date.Equals(NullRepresentation)
+                    ? new QDate(int.MinValue)
+                    : new QDate(DateTime.ParseExact(date, DateFormat, CultureInfo.InvariantCulture));
             }
             catch (Exception e)
             {
@@ -107,7 +107,7 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QDate.</param>
         /// <returns>true if the specified System.Object is equal to the current QDate; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
             if (obj == null)
             {
@@ -119,7 +119,7 @@ namespace qSharp
                 return false;
             }
 
-            return Value == ((QDate)obj).Value;
+            return Value == ((QDate) obj).Value;
         }
 
         public override int GetHashCode()

@@ -26,7 +26,8 @@ namespace qSharp.test
     {
         internal FunctionMock()
             : base(0)
-        { }
+        {
+        }
 
         public bool Equals(FunctionMock f)
         {
@@ -51,11 +52,11 @@ namespace qSharp.test
 
             var q1000 = new string[1000];
             var q200 = new object[] {new int[200], new int[200], new string[200]};
-            for (int i = 0; i < q1000.Length; i++)
+            for (var i = 0; i < q1000.Length; i++)
             {
                 q1000[i] = "q";
             }
-            for (int i = 0; i < 200; i++)
+            for (var i = 0; i < 200; i++)
             {
                 ((int[]) q200[0])[i] = i;
                 ((int[]) q200[1])[i] = i + 25;
@@ -66,12 +67,12 @@ namespace qSharp.test
             reference["([] q:1000#`q)"] = new QTable(new[] {"q"}, new object[] {q1000});
             reference["([] a:til 200;b:25+til 200;c:200#`a)"] = new QTable(new[] {"a", "b", "c"}, q200);
 
-            foreach (string expr in expressions.GetExpressions("q2"))
+            foreach (var expr in expressions.GetExpressions("q2"))
             {
                 var stream = new MemoryStream();
                 var writer = new BinaryWriter(stream);
                 var reader = new QReader(stream, Encoding.ASCII, QBasicConnection.DefaultMaxReadingChunk);
-                byte[] binaryExpr = expressions.GetBinaryExpression("q2", expr);
+                var binaryExpr = expressions.GetBinaryExpression("q2", expr);
                 writer.Write((byte) 1); // little endian
                 writer.Write((byte) 0);
                 writer.Write((byte) 1); // compressed
@@ -83,7 +84,7 @@ namespace qSharp.test
 
                 try
                 {
-                    object obj = reader.Read().Data;
+                    var obj = reader.Read().Data;
                     if (obj is QDictionary || obj is QTable || obj is QLambda)
                     {
                         // force usage of Equals method
@@ -94,7 +95,68 @@ namespace qSharp.test
                         Assert.AreEqual(reference[expr], obj, "Deserialization failed for q expression: " + expr);
                     }
                 }
-                catch (System.Exception e)
+                catch (Exception e)
+                {
+                    Assert.Fail("Deserialization failed for q expression: " + expr + " caused by: " + e);
+                }
+                finally
+                {
+                    stream.Close();
+                }
+            }
+        }
+
+        [Test]
+        public void TestFunctionsDeserialization()
+        {
+            var expressions =
+                new QExpressions(new Dictionary<string, string> {{"q3", "..\\..\\test\\QExpressionsFunctions.out"}});
+            var reference = new Dictionary<string, object>
+            {
+                {"{x+y}[3]", new QProjection(new object[] {new QLambda("{x+y}"), 3L})},
+                {"insert [1]", new QProjection(new object[] {new FunctionMock(), 1L})},
+                {"xbar", new QLambda("k){x*y div x:$[16h=abs[@x];\"j\"$x;x]}")},
+                {"not", new FunctionMock()},
+                {"and", new FunctionMock()},
+                {"md5", new QProjection(new object[] {new FunctionMock(), -15L})},
+                {"any", new FunctionMock()},
+                {"save", new FunctionMock()},
+                {"raze", new FunctionMock()},
+                {"sums", new FunctionMock()},
+                {"prev", new FunctionMock()}
+            };
+
+
+            foreach (var expr in expressions.GetExpressions("q3"))
+            {
+                var stream = new MemoryStream();
+                var writer = new BinaryWriter(stream);
+                var reader = new QReader(stream, Encoding.ASCII, QBasicConnection.DefaultMaxReadingChunk);
+
+                var binaryExpr = expressions.GetBinaryExpression("q3", expr);
+                writer.Write((byte) 1); // little endian
+                writer.Write((byte) 0);
+                writer.Write((byte) 0); // uncompressed
+                writer.Write((byte) 0);
+                writer.Write(binaryExpr.Length + 8);
+                writer.Write(binaryExpr);
+                writer.Flush();
+                stream.Seek(0, SeekOrigin.Begin);
+
+                try
+                {
+                    var obj = reader.Read().Data;
+                    if (obj is QDictionary || obj is QTable || obj is QLambda || obj is QProjection || obj is QFunction)
+                    {
+                        // force usage of Equals method
+                        Assert.IsTrue(reference[expr].Equals(obj), "Deserialization failed for q expression: " + expr);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(reference[expr], obj, "Deserialization failed for q expression: " + expr);
+                    }
+                }
+                catch (Exception e)
                 {
                     Assert.Fail("Deserialization failed for q expression: " + expr + " caused by: " + e);
                 }
@@ -109,12 +171,12 @@ namespace qSharp.test
         public void TestObjectDeserializationQ2()
         {
             var expressions = new QExpressions(new Dictionary<string, string> {{"q2", "..\\..\\test\\QExpressions.out"}});
-            foreach (string expr in expressions.GetExpressions("q2"))
+            foreach (var expr in expressions.GetExpressions("q2"))
             {
                 var stream = new MemoryStream();
                 var writer = new BinaryWriter(stream);
                 var reader = new QReader(stream, Encoding.ASCII, QBasicConnection.DefaultMaxReadingChunk);
-                byte[] binaryExpr = expressions.GetBinaryExpression("q2", expr);
+                var binaryExpr = expressions.GetBinaryExpression("q2", expr);
                 writer.Write((byte) 1); // little endian
                 writer.Write((byte) 0);
                 writer.Write((byte) 0);
@@ -126,23 +188,23 @@ namespace qSharp.test
 
                 try
                 {
-                    object obj = reader.Read().Data;
+                    var obj = reader.Read().Data;
                     if (obj is QDictionary || obj is QTable || obj is QLambda)
                     {
                         // force usage of Equals method
                         Assert.IsTrue(expressions.GetReferenceObject("q2", expr).Equals(obj),
-                                      "Deserialization failed for q expression: " + expr);
+                            "Deserialization failed for q expression: " + expr);
                     }
                     else
                     {
                         Assert.AreEqual(expressions.GetReferenceObject("q2", expr), obj,
-                                        "Deserialization failed for q expression: " + expr);
+                            "Deserialization failed for q expression: " + expr);
                     }
                 }
                 catch (QException e)
                 {
                     Assert.AreEqual(((QException) expressions.GetReferenceObject("q2", expr)).Message, e.Message,
-                                    "Deserialization failed for q error: " + e.Message);
+                        "Deserialization failed for q error: " + e.Message);
                 }
                 finally
                 {
@@ -156,12 +218,12 @@ namespace qSharp.test
         {
             var expressions =
                 new QExpressions(new Dictionary<string, string> {{"q3", "..\\..\\test\\QExpressions.3.out"}});
-            foreach (string expr in expressions.GetExpressions("q3"))
+            foreach (var expr in expressions.GetExpressions("q3"))
             {
                 var stream = new MemoryStream();
                 var writer = new BinaryWriter(stream);
                 var reader = new QReader(stream, Encoding.ASCII, QBasicConnection.DefaultMaxReadingChunk);
-                byte[] binaryExpr = expressions.GetBinaryExpression("q3", expr);
+                var binaryExpr = expressions.GetBinaryExpression("q3", expr);
                 writer.Write((byte) 1); // little endian
                 writer.Write((byte) 0);
                 writer.Write((byte) 0);
@@ -173,85 +235,24 @@ namespace qSharp.test
 
                 try
                 {
-                    object obj = reader.Read().Data;
+                    var obj = reader.Read().Data;
                     if (obj is QDictionary || obj is QTable || obj is QLambda)
                     {
                         // force usage of Equals method
                         Assert.IsTrue(expressions.GetReferenceObject("q3", expr).Equals(obj),
-                                      "Deserialization failed for q expression: " + expr);
+                            "Deserialization failed for q expression: " + expr);
                     }
                     else
                     {
                         Assert.AreEqual(expressions.GetReferenceObject("q3", expr), obj,
-                                        "Deserialization failed for q expression: " + expr);
+                            "Deserialization failed for q expression: " + expr);
                     }
                 }
                 catch (QException e)
                 {
-                    System.Console.WriteLine(e);
+                    Console.WriteLine(e);
                     Assert.AreEqual(((QException) expressions.GetReferenceObject("q3", expr)).Message, e.Message,
-                                    "Deserialization failed for q error: " + e.Message);
-                }
-                finally
-                {
-                    stream.Close();
-                }
-            }
-        }
-
-        [Test]
-        public void TestFunctionsDeserialization()
-        {
-            var expressions =
-                new QExpressions(new Dictionary<string, string> { { "q3", "..\\..\\test\\QExpressionsFunctions.out" } });
-            var reference = new Dictionary<string, object>
-            {
-                {"{x+y}[3]", new QProjection(new object[] { new QLambda("{x+y}"), 3L })},
-                {"insert [1]", new QProjection(new object[] { new FunctionMock(), 1L })},
-                {"xbar", new QLambda("k){x*y div x:$[16h=abs[@x];\"j\"$x;x]}")},
-                {"not", new FunctionMock()},
-                {"and", new FunctionMock()},
-                {"md5", new QProjection(new object[] { new FunctionMock(), -15L })},
-                {"any", new FunctionMock()},
-                {"save", new FunctionMock()},
-                {"raze", new FunctionMock()},
-                {"sums", new FunctionMock()},
-                {"prev", new FunctionMock()},
-            };
-           
-
-            foreach (string expr in expressions.GetExpressions("q3"))
-            {
-                var stream = new MemoryStream();
-                var writer = new BinaryWriter(stream);
-                var reader = new QReader(stream, Encoding.ASCII, QBasicConnection.DefaultMaxReadingChunk);
-
-                byte[] binaryExpr = expressions.GetBinaryExpression("q3", expr);
-                writer.Write((byte)1); // little endian
-                writer.Write((byte)0);
-                writer.Write((byte)0); // uncompressed
-                writer.Write((byte)0);
-                writer.Write(binaryExpr.Length + 8);
-                writer.Write(binaryExpr);
-                writer.Flush();
-                stream.Seek(0, SeekOrigin.Begin);
-
-                try
-                {
-                    object obj = reader.Read().Data;
-                    if (obj is QDictionary || obj is QTable || obj is QLambda || obj is QProjection || obj is QFunction)
-                    {
-                        // force usage of Equals method
-                        Assert.IsTrue(reference[expr].Equals(obj), "Deserialization failed for q expression: " + expr);
-                    }
-                    else
-                    {
-                        Assert.AreEqual(reference[expr], obj, "Deserialization failed for q expression: " + expr);
-                    }
-                }
-                catch (System.Exception e)
-                {
-                    Assert.Fail("Deserialization failed for q expression: " + expr + " caused by: " + e);
+                        "Deserialization failed for q error: " + e.Message);
                 }
                 finally
                 {

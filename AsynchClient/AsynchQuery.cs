@@ -19,12 +19,12 @@ using System.Threading;
 
 namespace qSharp.Sample
 {
-    class AsynchQuery
+    internal class AsynchQuery
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            QCallbackConnection q = new QCallbackConnection(host: (args.Length >= 1) ? args[0] : "localhost",
-                                                            port: (args.Length >= 2) ? Int32.Parse(args[1]) : 5000);
+            var q = new QCallbackConnection((args.Length >= 1) ? args[0] : "localhost",
+                (args.Length >= 2) ? int.Parse(args[1]) : 5000);
             try
             {
                 q.DataReceived += OnData;
@@ -39,9 +39,9 @@ namespace qSharp.Sample
                 q.Sync("asynchMult:{[queryid;a;b] res:a*b; (neg .z.w)(`queryid`result!(queryid;res)) }");
                 q.StartListener();
 
-                Random gen = new Random();
+                var gen = new Random();
                 // send asynchronous queries
-                for (int i = 0; i < 10; i++)
+                for (var i = 0; i < 10; i++)
                 {
                     int a = gen.Next(20), b = gen.Next(20);
                     Console.WriteLine("Asynchronous call with queryid=" + i + " with arguments= " + a + ", " + b);
@@ -65,14 +65,16 @@ namespace qSharp.Sample
             }
         }
 
-        static void OnData(object sender, QMessageEvent message)
+        private static void OnData(object sender, QMessageEvent message)
         {
             Console.WriteLine("Asynchronous message received.");
-            Console.WriteLine("message type: " + message.Message.MessageType + " size: " + message.Message.MessageSize + " isCompressed: " + message.Message.Compressed + " endianess: " + message.Message.Endianess);
+            Console.WriteLine("message type: " + message.Message.MessageType + " size: " + message.Message.MessageSize +
+                              " isCompressed: " + message.Message.Compressed + " endianess: " +
+                              message.Message.Endianess);
             PrintResult(message.Message.Data);
         }
 
-        static void PrintResult(object obj)
+        private static void PrintResult(object obj)
         {
             if (obj == null)
             {
@@ -88,13 +90,12 @@ namespace qSharp.Sample
             }
         }
 
-        static void PrintResult(QDictionary d)
+        private static void PrintResult(QDictionary d)
         {
             foreach (QDictionary.KeyValuePair e in d)
             {
                 Console.WriteLine(e.Key + "| " + e.Value);
             }
         }
-
     }
 }

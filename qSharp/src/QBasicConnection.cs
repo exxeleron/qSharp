@@ -19,37 +19,21 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
-
 namespace qSharp
 {
-
-
     /// <summary>
     ///     Connector class for interfacing with the kdb+ service.
     ///     Provides methods for synchronous and asynchronous interaction.
     ///     Methods of QBasicConnection are not thread safe.
     /// </summary>
-    public class QBasicConnection : QConnection
+    public class QBasicConnection : IDisposable, QConnection
     {
         public const int DefaultMaxReadingChunk = 65536;
-
-        public string Host { get; private set; }
-        public int Port { get; private set; }
-        public string Username { get; private set; }
-        public string Password { get; private set; }
-        public System.Text.Encoding Encoding { get; private set; }
-        public int MaxReadingChunk { get; private set; }
-
-        public int ProtocolVersion { get; protected set; }
-
-        protected internal TcpClient connection;
-        internal Stream stream;
-        protected QReader Reader { get; set; }
-        protected QWriter Writer { get; set; }
-
+        private TcpClient _connection;
+        private Stream _stream;
 
         /// <summary>
-        /// Initializes a new QBasicConnection instance.
+        ///     Initializes a new QBasicConnection instance.
         /// </summary>
         /// <param name="host">Host of remote q service</param>
         /// <param name="port">Port of remote q service</param>
@@ -57,7 +41,8 @@ namespace qSharp
         /// <param name="password">Password for remote authorization</param>
         /// <param name="encoding">Encoding used for serialization/deserialization of string objects. Default: Encoding.ASCII</param>
         /// <param name="maxReadingChunk">Maxium number of bytes read in a single chunk from stream</param>
-        public QBasicConnection(String host = "localhost", int port = 0, string username = null, string password = null, Encoding encoding = null, int maxReadingChunk = DefaultMaxReadingChunk)
+        public QBasicConnection(string host = "localhost", int port = 0, string username = null, string password = null,
+            Encoding encoding = null, int maxReadingChunk = DefaultMaxReadingChunk)
         {
             Encoding = encoding ?? Encoding.ASCII;
             Host = host;
@@ -67,79 +52,66 @@ namespace qSharp
             MaxReadingChunk = maxReadingChunk;
         }
 
+        private int MaxReadingChunk { get; set; }
+        private QReader Reader { get; set; }
+        private QWriter Writer { get; set; }
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            Close();
+        }
+
+        #endregion
+
+        public string Host { get; private set; }
+        public int Port { get; private set; }
+        public string Username { get; private set; }
+        public string Password { get; private set; }
+        public Encoding Encoding { get; private set; }
+        public int ProtocolVersion { get; private set; }
+
         /// <summary>
         ///     Initializes connection with the remote q service.
         /// </summary>
-        virtual public void Open()
+        public virtual void Open()
         {
-            if (!IsConnected())
+            if (IsConnected()) return;
+            if (Host != null)
             {
-                if (Host != null)
-                {
-                    InitSocket();
-                    Initialize();
-
-                    Reader = new QReader(stream, Encoding, MaxReadingChunk);
-                    Writer = new QWriter(stream, Encoding, ProtocolVersion);
-                }
-                else
-                {
-                    throw new QConnectionException("Host cannot be null");
-                }
-            }
-        }
-
-        private void InitSocket()
-        {
-            connection = new TcpClient(Host, Port);
-            stream = connection.GetStream();
-        }
-
-        private void Initialize()
-        {
-            string credentials = Password != null ? string.Format("{0}:{1}", Username, Password) : Username;
-            byte[] request = Encoding.GetBytes(credentials + "\x3\x0");
-            byte[] response = new byte[2];
-
-            stream.Write(request, 0, request.Length);
-            if (stream.Read(response, 0, 1) != 1)
-            {
-                Close();
                 InitSocket();
+                Initialize();
 
-                request = Encoding.GetBytes(credentials + "\x0");
-                stream.Write(request, 0, request.Length);
-                if (stream.Read(response, 0, 1) != 1)
-                {
-                    throw new QConnectionException("Connection denied.");
-                }
+                Reader = new QReader(_stream, Encoding, MaxReadingChunk);
+                Writer = new QWriter(_stream, Encoding, ProtocolVersion);
             }
-
-            ProtocolVersion = Math.Min(response[0], (byte)3);
+            else
+            {
+                throw new QConnectionException("Host cannot be null");
+            }
         }
 
         /// <summary>
         ///     Closes connection with the remote q service.
         /// </summary>
-        virtual public void Close()
+        public virtual void Close()
         {
-            if (IsConnected())
-            {
-                connection.Close();
-                connection = null;
-            }
+            if (!IsConnected()) return;
+            _connection.Close();
+            _connection = null;
         }
 
         /// <summary>
         ///     Reinitializes connection with the remote q service.
         /// </summary>
-        virtual public void Reset()
+        public virtual void Reset()
         {
-            if (connection != null)
+            if (_connection != null)
             {
-                connection.Close();
+                _connection.Close();
             }
-            connection = null;
+            _connection = null;
             Open();
         }
 
@@ -149,8 +121,8 @@ namespace qSharp
         /// <returns>true if connection with remote host is established and is active, false otherwise</returns>
         public bool IsConnected()
         {
-            return connection != null && connection.Connected && connection.Client.Connected
-                   && !(connection.Client.Poll(1000, SelectMode.SelectRead) & (connection.Client.Available == 0));
+            return _connection != null && _connection.Connected && _connection.Client.Connected
+                   && !(_connection.Client.Poll(1000, SelectMode.SelectRead) & (_connection.Client.Available == 0));
         }
 
         /// <summary>
@@ -159,20 +131,18 @@ namespace qSharp
         /// <param name="query">Query to be executed</param>
         /// <param name="parameters">Additional parameters</param>
         /// <returns>deserialized response from the remote q service</returns>
-        virtual public object Sync(string query, params object[] parameters)
+        public virtual object Sync(string query, params object[] parameters)
         {
             Query(MessageType.Sync, query, parameters);
-            QMessage response = Reader.Read();
+            var response = Reader.Read();
 
             if (response.MessageType == MessageType.Response)
             {
                 return response.Data;
             }
-            else
-            {
-                Writer.Write(new QException("nyi: qSharp expected response message"), response.MessageType == MessageType.Async ? MessageType.Async : MessageType.Response);
-                throw new QReaderException("Received an " + response.MessageType + " message where response where expected");
-            }
+            Writer.Write(new QException("nyi: qSharp expected response message"),
+                response.MessageType == MessageType.Async ? MessageType.Async : MessageType.Response);
+            throw new QReaderException("Received an " + response.MessageType + " message where response where expected");
         }
 
         /// <summary>
@@ -180,7 +150,7 @@ namespace qSharp
         /// </summary>
         /// <param name="query">Query to be executed</param>
         /// <param name="parameters">Additional parameters</param>
-        virtual public void Async(string query, params object[] parameters)
+        public virtual void Async(string query, params object[] parameters)
         {
             Query(MessageType.Async, query, parameters);
         }
@@ -192,9 +162,9 @@ namespace qSharp
         /// <param name="msgType">Indicates whether message should be synchronous or asynchronous</param>
         /// <param name="query">Query to be executed</param>
         /// <param name="parameters">Additional parameters</param>
-        virtual public int Query(MessageType msgType, string query, params object[] parameters)
+        public virtual int Query(MessageType msgType, string query, params object[] parameters)
         {
-            if (stream == null)
+            if (_stream == null)
             {
                 throw new QConnectionException("Connection has not been initalized.");
             }
@@ -208,30 +178,59 @@ namespace qSharp
             {
                 return Writer.Write(query.ToCharArray(), msgType);
             }
-            else
+            var request = new object[parameters.Length + 1];
+            request[0] = query.ToCharArray();
+
+            var i = 1;
+            foreach (var param in parameters)
             {
-                var request = new object[parameters.Length + 1];
-                request[0] = query.ToCharArray();
-
-                int i = 1;
-                foreach (object param in parameters)
-                {
-                    request[i++] = param;
-                }
-
-                return Writer.Write(request, msgType);
+                request[i++] = param;
             }
+
+            return Writer.Write(request, msgType);
         }
 
         /// <summary>
         ///     Reads next message from the remote q service.
         /// </summary>
-        /// <param name="dataOnly">if true returns only data part of the message, if false retuns data and message meta-information encapsulated in QMessage</param>
+        /// <param name="dataOnly">
+        ///     if true returns only data part of the message, if false retuns data and message meta-information
+        ///     encapsulated in QMessage
+        /// </param>
         /// <param name="raw">indicates whether message should be parsed to C# object or returned as an array of bytes</param>
         /// <returns>deserialized response from the remote q service</returns>
-        virtual public object Receive(bool dataOnly = true, bool raw = false)
+        public virtual object Receive(bool dataOnly = true, bool raw = false)
         {
             return dataOnly ? Reader.Read(raw).Data : Reader.Read(raw);
+        }
+
+        private void InitSocket()
+        {
+            _connection = new TcpClient(Host, Port);
+            _stream = _connection.GetStream();
+        }
+
+        private void Initialize()
+        {
+            var credentials = Password != null ? string.Format("{0}:{1}", Username, Password) : Username;
+            var request = Encoding.GetBytes(credentials + "\x3\x0");
+            var response = new byte[2];
+
+            _stream.Write(request, 0, request.Length);
+            if (_stream.Read(response, 0, 1) != 1)
+            {
+                Close();
+                InitSocket();
+
+                request = Encoding.GetBytes(credentials + "\x0");
+                _stream.Write(request, 0, request.Length);
+                if (_stream.Read(response, 0, 1) != 1)
+                {
+                    throw new QConnectionException("Connection denied.");
+                }
+            }
+
+            ProtocolVersion = Math.Min(response[0], (byte) 3);
         }
 
         /// <summary>
@@ -242,6 +241,5 @@ namespace qSharp
         {
             return string.Format(":{0}:{1}", Host, Port);
         }
-
     }
 }

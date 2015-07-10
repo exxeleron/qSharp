@@ -15,20 +15,16 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace qSharp.Sample
 {
     public class Publisher
     {
-
-        public static void Main(String[] Args)
+        public static void Main(string[] Args)
         {
             QConnection q = new QBasicConnection(Args.Length >= 1 ? Args[0] : "localhost",
-                                                 Args.Length >= 2 ? int.Parse(Args[1]) : 5001, null, null);
+                Args.Length >= 2 ? int.Parse(Args[1]) : 5001, null, null);
             try
             {
                 q.Open();
@@ -37,8 +33,8 @@ namespace qSharp.Sample
                 Console.WriteLine("Press <ENTER> to close application");
                 q.Sync(".u.upd:{[x;y] show (x;y)};");
 
-                PublisherTask pt = new PublisherTask(q);
-                Thread workerThread = new Thread(pt.Run);
+                var pt = new PublisherTask(q);
+                var workerThread = new Thread(pt.Run);
                 workerThread.Start();
 
                 Console.ReadLine();
@@ -54,19 +50,18 @@ namespace qSharp.Sample
                 q.Close();
             }
         }
-
     }
 
-    class PublisherTask
+    internal class PublisherTask
     {
-        private QConnection q;
-        private Random r;
-        private Boolean running = true;
+        private readonly QConnection q;
+        private readonly Random r;
+        private bool running = true;
 
         public PublisherTask(QConnection q)
         {
             this.q = q;
-            this.r = new Random((int)DateTime.Now.Millisecond);
+            r = new Random(DateTime.Now.Millisecond);
         }
 
         public void Stop()
@@ -85,27 +80,26 @@ namespace qSharp.Sample
                     // table: ask
                     q.Sync(".u.upd", "ask", GetAskData());
                     Console.Out.Write(".");
-                    System.Threading.Thread.Sleep(500);
+                    Thread.Sleep(500);
                 }
                 catch (QException e1)
                 {
                     // q error
                     Console.WriteLine("`" + e1.Message);
                 }
-
             }
         }
 
-        private Object[] GetAskData()
+        private object[] GetAskData()
         {
-            int rows = r.Next(10) + 1;
-            Object[] data = new Object[] { new QTime[rows], new String[rows], new String[rows], new float[rows] };
-            for (int i = 0; i < rows; i++)
+            var rows = r.Next(10) + 1;
+            object[] data = {new QTime[rows], new string[rows], new string[rows], new float[rows]};
+            for (var i = 0; i < rows; i++)
             {
-                ((QTime[])data[0])[i] = new QTime(DateTime.Now);
-                ((String[])data[1])[i] = "INSTR_" + r.Next(100);
-                ((String[])data[2])[i] = "qSharp";
-                ((float[])data[3])[i] = (float)r.NextDouble() * r.Next(100);
+                ((QTime[]) data[0])[i] = new QTime(DateTime.Now);
+                ((string[]) data[1])[i] = "INSTR_" + r.Next(100);
+                ((string[]) data[2])[i] = "qSharp";
+                ((float[]) data[3])[i] = (float) r.NextDouble()*r.Next(100);
             }
 
             return data;

@@ -28,8 +28,7 @@ namespace qSharp
         private const string NanosFormat = "{0:000000}";
         private const string NullRepresentation = "0Nn";
         private const long NanosPerDay = 86400000000000L;
-
-        private DateTime datetime;
+        private DateTime _datetime;
 
         /// <summary>
         ///     Creates new QTimespan instance using specified q timespan value.
@@ -48,8 +47,8 @@ namespace qSharp
         public QTimespan(DateTime datetime)
             : this()
         {
-            this.datetime = datetime;
-            Value = (long)(1e6 * (datetime - QTypes.QEpoch).TotalMilliseconds);
+            _datetime = datetime;
+            Value = (long) (1e6*(datetime - QTypes.QEpoch).TotalMilliseconds);
         }
 
         public long Value { get; private set; }
@@ -67,11 +66,11 @@ namespace qSharp
         /// </summary>
         public DateTime ToDateTime()
         {
-            if (datetime == DateTime.MinValue)
+            if (_datetime == DateTime.MinValue)
             {
-                datetime = QTypes.QEpoch.AddMilliseconds(Math.Abs((double)Value) / 1000000L);
+                _datetime = QTypes.QEpoch.AddMilliseconds(Math.Abs((double) Value)/1000000L);
             }
-            return datetime;
+            return _datetime;
         }
 
         /// <summary>
@@ -81,13 +80,14 @@ namespace qSharp
         {
             if (Value != long.MinValue)
             {
-                return (Value < 0 ? "-" : "") + (Math.Abs(Value) / NanosPerDay) + ToDateTime().ToString(DateFormat) + String.Format(NanosFormat, Math.Abs(Value % 1000000L));
+                return (Value < 0 ? "-" : "") + (Math.Abs(Value)/NanosPerDay) + ToDateTime().ToString(DateFormat) +
+                       string.Format(NanosFormat, Math.Abs(Value%1000000L));
             }
             return NullRepresentation;
         }
 
         /// <summary>
-        /// Returns a QTimespan represented by a given string.
+        ///     Returns a QTimespan represented by a given string.
         /// </summary>
         /// <param name="date">string representation</param>
         /// <returns>a QTimespan instance</returns>
@@ -95,17 +95,18 @@ namespace qSharp
         {
             try
             {
-
-                if (date == null || date.Length == 0 || date.Equals(NullRepresentation))
+                if (string.IsNullOrWhiteSpace(date) || date.Equals(NullRepresentation))
                 {
                     return new QTimespan(long.MinValue);
                 }
-                else
-                {
-                    long nanos = (long)(1e6 * DateTime.ParseExact(date.Substring(date.IndexOf("D"), 13), DateFormat, CultureInfo.InvariantCulture).TimeOfDay.TotalMilliseconds)
-                        + long.Parse(date.Substring(date.LastIndexOf(".") + 3));
-                    return new QTimespan(int.Parse(date.Substring(0, date.IndexOf("D"))) * NanosPerDay + (date.StartsWith("-") ? -1 : 1) * nanos);
-                }
+                var nanos = (long)
+                    (1e6*
+                     DateTime.ParseExact(date.Substring(date.IndexOf("D", StringComparison.InvariantCulture), 13), DateFormat, CultureInfo.InvariantCulture)
+                         .TimeOfDay.TotalMilliseconds)
+                            + long.Parse(date.Substring(date.LastIndexOf(".", StringComparison.InvariantCulture) + 3));
+                return
+                    new QTimespan(int.Parse(date.Substring(0, date.IndexOf("D", StringComparison.InvariantCulture))) * NanosPerDay +
+                                  (date.StartsWith("-") ? -1 : 1)*nanos);
             }
             catch (Exception e)
             {
@@ -118,24 +119,19 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QTimespan.</param>
         /// <returns>true if the specified System.Object is equal to the current QTimespan; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             if (!(obj is QTimespan))
             {
                 return false;
             }
 
-            return Value == ((QTimespan)obj).Value;
+            return Value == ((QTimespan) obj).Value;
         }
 
         public override int GetHashCode()
         {
-            return ((int)Value) ^ ((int)(Value >> 32));
+            return ((int) Value) ^ ((int) (Value >> 32));
         }
     }
 }

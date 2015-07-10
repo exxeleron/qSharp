@@ -15,17 +15,13 @@
 //
 
 using System;
-using System.IO;
-using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
 namespace qSharp
 {
-
     /// <summary>
-    /// Encapsulates a message received from kdb+.
+    ///     Encapsulates a message received from kdb+.
     /// </summary>
     public class QMessageEvent : EventArgs
     {
@@ -35,7 +31,7 @@ namespace qSharp
         public readonly QMessage Message;
 
         /// <summary>
-        /// Creates new QMessageEvent object.
+        ///     Creates new QMessageEvent object.
         /// </summary>
         /// <param name="message">message received from kdb+</param>
         public QMessageEvent(QMessage message)
@@ -45,7 +41,7 @@ namespace qSharp
     }
 
     /// <summary>
-    /// Encapsulates an error encountered during receiving data from kdb+.
+    ///     Encapsulates an error encountered during receiving data from kdb+.
     /// </summary>
     public class QErrorEvent : EventArgs
     {
@@ -55,7 +51,7 @@ namespace qSharp
         public readonly Exception Cause;
 
         /// <summary>
-        /// Creates new QErrorEvent object.
+        ///     Creates new QErrorEvent object.
         /// </summary>
         /// <param name="cause">original cause</param>
         public QErrorEvent(Exception cause)
@@ -71,27 +67,27 @@ namespace qSharp
     /// </summary>
     public class QCallbackConnection : QBasicConnection
     {
-
-        internal QListener listener;
-        internal Thread listenerThread;
-
-        virtual public event EventHandler<QMessageEvent> DataReceived;
-        virtual public event EventHandler<QErrorEvent> ErrorOccured;
+        private QListener _listener;
+        private Thread _listenerThread;
 
         /// <summary>
-        /// Initializes a new QCallbackConnection instance.
+        ///     Initializes a new QCallbackConnection instance.
         /// </summary>
         /// <param name="host">Host of remote q service</param>
         /// <param name="port">Port of remote q service</param>
         /// <param name="username">Username for remote authorization</param>
         /// <param name="password">Password for remote authorization</param>
         /// <param name="encoding">Encoding used for serialization/deserialization of string objects</param>
-        public QCallbackConnection(String host = "localhost", int port = 0, string username = null, string password = null,
-                           Encoding encoding = null)
+        public QCallbackConnection(string host = "localhost", int port = 0, string username = null,
+            string password = null,
+            Encoding encoding = null)
             : base(host, port, username, password, encoding)
         {
             // left empty
         }
+
+        public event EventHandler<QMessageEvent> DataReceived;
+        public event EventHandler<QErrorEvent> ErrorOccured;
 
         protected virtual void OnDataReceived(QMessageEvent e)
         {
@@ -113,63 +109,60 @@ namespace qSharp
         ///     Spawns a new thread which listens for asynchronous messages from the remote q host.
         ///     If a listener thread already exists, nothing happens.
         /// </summary>
-        virtual public void StartListener()
+        public virtual void StartListener()
         {
             lock (this)
             {
-                if (listener == null)
-                {
-                    listener = new QListener(this);
-                    listenerThread = new Thread(listener.Run);
-                    listenerThread.Start();
-                }
+                if (_listener != null) return;
+                _listener = new QListener(this);
+                _listenerThread = new Thread(_listener.Run);
+                _listenerThread.Start();
             }
         }
 
         /// <summary>
-        ///     Indicates that a listener thread should stop. The listener thread is stopped after receiving next message from the remote q host.
+        ///     Indicates that a listener thread should stop. The listener thread is stopped after receiving next message from the
+        ///     remote q host.
         ///     If a listener doesn't exists, nothing happens.
         /// </summary>
-        virtual public void StopListener()
+        public virtual void StopListener()
         {
             lock (this)
             {
-                if (listener != null)
-                {
-                    listener.Running = false;
-                    listenerThread.Join(500);
-                    listener = null;
-                }
+                if (_listener == null) return;
+                _listener.Running = false;
+                _listenerThread.Join(500);
+                _listener = null;
             }
         }
 
-        protected internal class QListener
+        private class QListener
         {
-            private readonly QCallbackConnection connection;
+            private readonly QCallbackConnection _connection;
             internal volatile bool Running;
 
             internal QListener(QCallbackConnection connection)
             {
-                this.connection = connection;
+                _connection = connection;
                 Running = true;
             }
 
             internal void Run()
             {
-                while (Running && connection.IsConnected())
+                while (Running && _connection.IsConnected())
                 {
                     try
                     {
-                        object data = connection.Receive(dataOnly: false);
-                        connection.OnDataReceived(new QMessageEvent((QMessage) data));
+                        var data = _connection.Receive(false);
+                        _connection.OnDataReceived(new QMessageEvent((QMessage) data));
                     }
                     catch (QException e)
                     {
-                        connection.OnErrorOccured(new QErrorEvent(e));
+                        _connection.OnErrorOccured(new QErrorEvent(e));
                     }
                     catch (Exception e)
                     {
-                        connection.OnErrorOccured(new QErrorEvent(e));
+                        _connection.OnErrorOccured(new QErrorEvent(e));
                         Running = false;
                         break;
                     }

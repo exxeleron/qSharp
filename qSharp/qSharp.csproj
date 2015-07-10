@@ -53,12 +53,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework">
-      <HintPath>..\..\..\xlkdb\trunk\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\IQTable.cs" />
     <Compile Include="src\QProjection.cs" />
     <Compile Include="src\QFunction.cs" />
     <Compile Include="src\QBasicConnection.cs" />
