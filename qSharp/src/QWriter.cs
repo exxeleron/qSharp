@@ -27,14 +27,13 @@ namespace qSharp
     public sealed class QWriter
     {
         /// order of uid read/write
-        private static readonly int[] guidByteOrder = { 3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15 };
+        private static readonly int[] GuidByteOrder = {3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15};
 
-        private readonly Encoding encoding;
-        private readonly int protocolVersion;
-
-        private readonly Stream stream;
-        private BinaryWriter writer;
-        private int messageSize;
+        private readonly Encoding _encoding;
+        private readonly int _protocolVersion;
+        private readonly Stream _stream;
+        private int _messageSize;
+        private BinaryWriter _writer;
 
         /// <summary>
         ///     Initializes a new QWriter instance.
@@ -44,9 +43,9 @@ namespace qSharp
         /// <param name="protocolVersion">kdb+ protocol version</param>
         public QWriter(Stream stream, Encoding encoding, int protocolVersion)
         {
-            this.stream = stream;
-            this.encoding = encoding;
-            this.protocolVersion = protocolVersion;
+            _stream = stream;
+            _encoding = encoding;
+            _protocolVersion = protocolVersion;
         }
 
         /// <summary>
@@ -58,30 +57,30 @@ namespace qSharp
         public int Write(object obj, MessageType msgType)
         {
             var memStream = new MemoryStream();
-            writer = new BinaryWriter(memStream);
+            _writer = new BinaryWriter(memStream);
 
             // write header
             var header = new byte[8];
             header[0] = 1; // endianness
-            header[1] = (byte)msgType;
-            writer.Write(header);
+            header[1] = (byte) msgType;
+            _writer.Write(header);
             // serialize object
             WriteObject(obj);
             // write size
-            messageSize = (int)memStream.Position;
+            _messageSize = (int) memStream.Position;
 
-            writer.Seek(4, SeekOrigin.Begin);
-            writer.Write(messageSize);
+            _writer.Seek(4, SeekOrigin.Begin);
+            _writer.Write(_messageSize);
 
-            memStream.WriteTo(stream);
-            stream.Flush();
+            memStream.WriteTo(_stream);
+            _stream.Flush();
 
-            return messageSize;
+            return _messageSize;
         }
 
         private void WriteObject(object obj)
         {
-            QType qtype = QTypes.GetQType(obj);
+            var qtype = QTypes.GetQType(obj);
             switch (qtype)
             {
                 case QType.Bool:
@@ -121,13 +120,13 @@ namespace qSharp
                 case QType.MinuteList:
                 case QType.SecondList:
                 case QType.TimeList:
-                    WriteList((Array)obj, qtype);
+                    WriteList((Array) obj, qtype);
                     return;
                 case QType.String:
                     WriteString(obj as char[]);
                     return;
                 case QType.GeneralList:
-                    WriteGeneralList((Array)obj);
+                    WriteGeneralList((Array) obj);
                     return;
                 case QType.NullItem:
                     WriteNullItem();
@@ -142,13 +141,18 @@ namespace qSharp
                     WriteError(obj as Exception);
                     return;
                 case QType.Dictionary: // and QType.KeyedTable (both share the same q type - 99)
-                    if (obj is QDictionary)
+                    var dictionary = obj as QDictionary;
+                    if (dictionary != null)
                     {
-                        WriteDictionary(obj as QDictionary);
+                        WriteDictionary(dictionary);
                     }
-                    else if (obj is QKeyedTable)
+                    else
                     {
-                        WriteKeyedTable(obj as QKeyedTable);
+                        var kt = obj as QKeyedTable;
+                        if (kt != null)
+                        {
+                            WriteKeyedTable(kt);
+                        }
                     }
                     return;
                 case QType.Table:
@@ -161,80 +165,82 @@ namespace qSharp
 
         private void WriteError(Exception exception)
         {
-            writer.Write((sbyte)QType.Error);
+            _writer.Write((sbyte) QType.Error);
             WriteSymbol(exception.Message);
         }
 
         private void WriteAtom(object obj, QType qtype)
         {
-            writer.Write((sbyte)qtype);
+            _writer.Write((sbyte) qtype);
             switch (qtype)
             {
                 case QType.Bool:
-                    writer.Write((bool)obj);
+                    _writer.Write((bool) obj);
                     return;
                 case QType.Byte:
-                    writer.Write((byte)obj);
+                    _writer.Write((byte) obj);
                     return;
                 case QType.Guid:
-                    if (protocolVersion < 3)
+                    if (_protocolVersion < 3)
                     {
                         throw new QWriterException("kdb+ protocol version violation: guid not supported pre kdb+ v3.0");
                     }
-                    WriteGuid((Guid)obj);
+                    WriteGuid((Guid) obj);
                     return;
                 case QType.Short:
-                    writer.Write((short)obj);
+                    _writer.Write((short) obj);
                     return;
                 case QType.Int:
-                    writer.Write((int)obj);
+                    _writer.Write((int) obj);
                     return;
                 case QType.Long:
-                    writer.Write((long)obj);
+                    _writer.Write((long) obj);
                     return;
                 case QType.Float:
-                    writer.Write((float)obj);
+                    _writer.Write((float) obj);
                     return;
                 case QType.Double:
-                    writer.Write((double)obj);
+                    _writer.Write((double) obj);
                     return;
                 case QType.Char:
-                    writer.Write((char)obj);
+                    _writer.Write((char) obj);
                     return;
                 case QType.Symbol:
                     WriteSymbol(obj as string);
                     return;
                 case QType.Timestamp:
-                    if (protocolVersion < 1)
+                    if (_protocolVersion < 1)
                     {
-                        throw new QWriterException("kdb+ protocol version violation: timestamp not supported pre kdb+ v2.6");
+                        throw new QWriterException(
+                            "kdb+ protocol version violation: timestamp not supported pre kdb+ v2.6");
                     }
-                    writer.Write(((QTimestamp)obj).Value);
+                    _writer.Write(((QTimestamp) obj).Value);
                     return;
                 case QType.Month:
-                    writer.Write(((QMonth)obj).Value);
+                    _writer.Write(((QMonth) obj).Value);
                     return;
                 case QType.Date:
-                    writer.Write(((QDate)obj).Value);
+                    _writer.Write(((QDate) obj).Value);
                     return;
                 case QType.Datetime:
-                    writer.Write(((QDateTime)obj).Value);
+                    _writer.Write(((QDateTime) obj).Value);
                     return;
                 case QType.Timespan:
-                    if (protocolVersion < 1)
+                    if (_protocolVersion < 1)
                     {
-                        throw new QWriterException("kdb+ protocol version violation: timespan not supported pre kdb+ v2.6");
+                        throw new QWriterException(
+                            "kdb+ protocol version violation: timespan not supported pre kdb+ v2.6");
                     }
-                    writer.Write(((QTimespan)obj).Value);
+                    _writer.Write(((QTimespan) obj).Value);
                     return;
                 case QType.Minute:
-                    writer.Write(((QMinute)obj).Value);
+                    _writer.Write(((QMinute) obj).Value);
                     return;
                 case QType.Second:
-                    writer.Write(((QSecond)obj).Value);
+                    _writer.Write(((QSecond) obj).Value);
                     return;
                 case QType.Time:
-                    writer.Write(((QTime)obj).Value);
+                    _writer.Write(((QTime) obj).Value);
                     return;
             }
             throw new QWriterException("Unable to serialize q atom of type: " + qtype);
@@ -242,203 +248,205 @@ namespace qSharp
 
         private void WriteList(Array list, QType qtype)
         {
-            writer.Write((sbyte)qtype);
-            writer.Write((byte)0); // attributes
-            writer.Write(list.Length);
+            _writer.Write((sbyte) qtype);
+            _writer.Write((byte) 0); // attributes
+            _writer.Write(list.Length);
             switch (qtype)
             {
                 case QType.BoolList:
+                {
+                    var lst = list as bool[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as bool[];
-                        if (_list != null)
-                            foreach (bool a in _list)
-                            {
-                                writer.Write(a);
-                            }
-                        return;
+                        _writer.Write(a);
                     }
+                    return;
+                }
                 case QType.ByteList:
+                {
+                    var lst = list as byte[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as byte[];
-                        if (_list != null)
-                            foreach (byte a in _list)
-                            {
-                                writer.Write(a);
-                            }
-                        return;
+                        _writer.Write(a);
                     }
+                    return;
+                }
                 case QType.GuidList:
+                {
+                    if (_protocolVersion < 3)
                     {
-                        if (protocolVersion < 3)
-                        {
-                            throw new QWriterException("kdb+ protocol version violation: guid not supported pre kdb+ v3.0");
-                        }
-                        var _list = list as Guid[];
-                        if (_list != null)
-                            foreach (Guid a in _list)
-                            {
-                                WriteGuid(a);
-                            }
-                        return;
+                        throw new QWriterException("kdb+ protocol version violation: guid not supported pre kdb+ v3.0");
                     }
+                    var lst = list as Guid[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
+                    {
+                        WriteGuid(a);
+                    }
+                    return;
+                }
                 case QType.ShortList:
+                {
+                    var lst = list as short[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as short[];
-                        if (_list != null)
-                            foreach (short a in _list)
-                            {
-                                writer.Write(a);
-                            }
-                        return;
+                        _writer.Write(a);
                     }
+                    return;
+                }
                 case QType.IntList:
+                {
+                    var lst = list as int[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as int[];
-                        if (_list != null)
-                            foreach (int a in _list)
-                            {
-                                writer.Write(a);
-                            }
-                        return;
+                        _writer.Write(a);
                     }
+                    return;
+                }
                 case QType.LongList:
+                {
+                    var lst = list as long[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as long[];
-                        if (_list != null)
-                            foreach (long a in _list)
-                            {
-                                writer.Write(a);
-                            }
-                        return;
+                        _writer.Write(a);
                     }
+                    return;
+                }
                 case QType.FloatList:
+                {
+                    var lst = list as float[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as float[];
-                        if (_list != null)
-                            foreach (float a in _list)
-                            {
-                                writer.Write(a);
-                            }
-                        return;
+                        _writer.Write(a);
                     }
+                    return;
+                }
                 case QType.DoubleList:
+                {
+                    var lst = list as double[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as double[];
-                        if (_list != null)
-                            foreach (double a in _list)
-                            {
-                                writer.Write(a);
-                            }
-                        return;
+                        _writer.Write(a);
                     }
+                    return;
+                }
                 case QType.SymbolList:
+                {
+                    var lst = list as string[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as string[];
-                        if (_list != null)
-                            foreach (string a in _list)
-                            {
-                                WriteSymbol(a);
-                            }
-                        return;
+                        WriteSymbol(a);
                     }
+                    return;
+                }
                 case QType.TimestampList:
+                {
+                    if (_protocolVersion < 1)
                     {
-                        if (protocolVersion < 1)
-                        {
-                            throw new QWriterException("kdb+ protocol version violation: timestamp not supported pre kdb+ v2.6");
-                        }
-                        var _list = list as QTimestamp[];
-                        if (_list != null)
-                            foreach (QTimestamp a in _list)
-                            {
-                                writer.Write((a).Value);
-                            }
-                        return;
+                        throw new QWriterException(
+                            "kdb+ protocol version violation: timestamp not supported pre kdb+ v2.6");
                     }
+                    var lst = list as QTimestamp[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
+                    {
+                        _writer.Write((a).Value);
+                    }
+                    return;
+                }
                 case QType.MonthList:
+                {
+                    var lst = list as QMonth[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as QMonth[];
-                        if (_list != null)
-                            foreach (QMonth a in _list)
-                            {
-                                writer.Write((a).Value);
-                            }
-                        return;
+                        _writer.Write((a).Value);
                     }
+                    return;
+                }
                 case QType.DateList:
+                {
+                    var lst = list as QDate[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as QDate[];
-                        if (_list != null)
-                            foreach (QDate a in _list)
-                            {
-                                writer.Write((a).Value);
-                            }
-                        return;
+                        _writer.Write((a).Value);
                     }
+                    return;
+                }
                 case QType.DatetimeList:
+                {
+                    var lst = list as QDateTime[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as QDateTime[];
-                        if (_list != null)
-                            foreach (QDateTime a in _list)
-                            {
-                                writer.Write((a).Value);
-                            }
-                        return;
+                        _writer.Write((a).Value);
                     }
+                    return;
+                }
                 case QType.TimespanList:
+                {
+                    if (_protocolVersion < 1)
                     {
-                        if (protocolVersion < 1)
-                        {
-                            throw new QWriterException("kdb+ protocol version violation: timespan not supported pre kdb+ v2.6");
-                        }
-                        var _list = list as QTimespan[];
-                        if (_list != null)
-                            foreach (QTimespan a in _list)
-                            {
-                                writer.Write((a).Value);
-                            }
-                        return;
+                        throw new QWriterException(
+                            "kdb+ protocol version violation: timespan not supported pre kdb+ v2.6");
                     }
+                    var lst = list as QTimespan[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
+                    {
+                        _writer.Write((a).Value);
+                    }
+                    return;
+                }
                 case QType.MinuteList:
-                    {
-                        var _list = list as QMinute[];
-                        if (_list != null)
-                            foreach (QMinute a in _list)
-                            {
-                                writer.Write((a).Value);
-                            }
-                        return;
-                    }
+                {
+                    var lst = list as QMinute[];
+                    if (lst != null)
+                        foreach (var a in lst)
+                        {
+                            _writer.Write((a).Value);
+                        }
+                    return;
+                }
                 case QType.SecondList:
+                {
+                    var lst = list as QSecond[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as QSecond[];
-                        if (_list != null)
-                            foreach (QSecond a in _list)
-                            {
-                                writer.Write((a).Value);
-                            }
-                        return;
+                        _writer.Write((a).Value);
                     }
+                    return;
+                }
                 case QType.TimeList:
+                {
+                    var lst = list as QTime[];
+                    if (lst == null) return;
+                    foreach (var a in lst)
                     {
-                        var _list = list as QTime[];
-                        if (_list != null)
-                            foreach (QTime a in _list)
-                            {
-                                writer.Write((a).Value);
-                            }
-                        return;
+                        _writer.Write((a).Value);
                     }
+                    return;
+                }
             }
             throw new QWriterException("Unable to serialize q vector of type: " + qtype);
         }
 
         private void WriteGeneralList(Array list)
         {
-            writer.Write((sbyte)QType.GeneralList);
-            writer.Write((byte)0); // attributes
-            writer.Write(list.Length);
-            foreach (object obj in list)
+            _writer.Write((sbyte) QType.GeneralList);
+            _writer.Write((byte) 0); // attributes
+            _writer.Write(list.Length);
+            foreach (var obj in list)
             {
                 WriteObject(obj);
             }
@@ -446,54 +454,52 @@ namespace qSharp
 
         private void WriteString(char[] s)
         {
-            writer.Write((sbyte)QType.String);
-            writer.Write((byte)0); // attributes
-            byte[] encoded = encoding.GetBytes(new string(s));
-            writer.Write(encoded.Length);
-            writer.Write(encoded);
+            _writer.Write((sbyte) QType.String);
+            _writer.Write((byte) 0); // attributes
+            var encoded = _encoding.GetBytes(new string(s));
+            _writer.Write(encoded.Length);
+            _writer.Write(encoded);
         }
 
         private void WriteSymbol(string s)
         {
-            writer.Write(encoding.GetBytes(s));
-            writer.Write((byte)0);
+            _writer.Write(_encoding.GetBytes(s));
+            _writer.Write((byte) 0);
         }
-
 
         private void WriteGuid(Guid g)
         {
-            if (protocolVersion < 3)
+            if (_protocolVersion < 3)
             {
                 throw new QWriterException("kdb+ protocol version violation: Guid not supported pre kdb+ v3.0");
             }
 
-            byte[] b = g.ToByteArray();
-            for (int i = 0; i < b.Length; i++)
+            var b = g.ToByteArray();
+            for (var i = 0; i < b.Length; i++)
             {
-                int index = guidByteOrder[i];
-                writer.Write(b[index]);
+                var index = GuidByteOrder[i];
+                _writer.Write(b[index]);
             }
         }
 
-
         private void WriteNullItem()
         {
-            writer.Write((sbyte)QType.NullItem);
-            writer.Write((byte)0);
+            _writer.Write((sbyte) QType.NullItem);
+            _writer.Write((byte) 0);
         }
 
         private void WriteLambda(QLambda l)
         {
-            writer.Write((sbyte)QType.Lambda);
-            writer.Write((byte)0);
+            _writer.Write((sbyte) QType.Lambda);
+            _writer.Write((byte) 0);
             WriteString(l.Expression.ToCharArray());
         }
 
         private void WriteProjection(QProjection p)
         {
-            writer.Write((sbyte)QType.LambdaPart);
-            writer.Write(p.Parameters.Length);
-            foreach (object parameter in p.Parameters)
+            _writer.Write((sbyte) QType.LambdaPart);
+            _writer.Write(p.Parameters.Length);
+            foreach (var parameter in p.Parameters)
             {
                 WriteObject(parameter);
             }
@@ -501,23 +507,23 @@ namespace qSharp
 
         private void WriteDictionary(QDictionary d)
         {
-            writer.Write((sbyte)QType.Dictionary);
+            _writer.Write((sbyte) QType.Dictionary);
             WriteObject(d.Keys);
             WriteObject(d.Values);
         }
 
         private void WriteKeyedTable(QKeyedTable kt)
         {
-            writer.Write((sbyte)QType.KeyedTable);
+            _writer.Write((sbyte) QType.KeyedTable);
             WriteObject(kt.Keys);
             WriteObject(kt.Values);
         }
 
         private void WriteTable(QTable t)
         {
-            writer.Write((sbyte)QType.Table);
-            writer.Write((byte)0); // attributes
-            writer.Write((sbyte)QType.Dictionary);
+            _writer.Write((sbyte) QType.Table);
+            _writer.Write((byte) 0); // attributes
+            _writer.Write((sbyte) QType.Dictionary);
             WriteObject(t.Columns);
             WriteObject(t.Data);
         }

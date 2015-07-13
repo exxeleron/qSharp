@@ -24,9 +24,9 @@ namespace qSharp
     /// </summary>
     public sealed class QDictionary : IEnumerable
     {
-        private readonly Array keys;
-        private readonly object values;
-        private readonly bool areValuesArray;
+        private readonly bool _areValuesArray;
+        private readonly Array _keys;
+        private readonly object _values;
 
         /// <summary>
         ///     Creates new QDictionary instance with given keys and values arrays.
@@ -48,9 +48,9 @@ namespace qSharp
                 throw new ArgumentException("Keys and value arrays cannot have different length");
             }
 
-            this.keys = keys;
-            this.values = values;
-            this.areValuesArray = true;
+            _keys = keys;
+            _values = values;
+            _areValuesArray = true;
         }
 
         /// <summary>
@@ -73,9 +73,9 @@ namespace qSharp
                 throw new ArgumentException("Keys and value arrays cannot have different length");
             }
 
-            this.keys = keys;
-            this.values = values;
-            this.areValuesArray = false;
+            _keys = keys;
+            _values = values;
+            _areValuesArray = false;
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace qSharp
         /// </summary>
         public Array Keys
         {
-            get { return keys; }
+            get { return _keys; }
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace qSharp
         /// </summary>
         public object Values
         {
-            get { return values; }
+            get { return _values; }
         }
 
         /// <summary>
@@ -108,27 +108,20 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QDictionary.</param>
         /// <returns>true if the specified System.Object is equal to the current QDictionary; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             var d = obj as QDictionary;
             if (d == null)
             {
                 return false;
             }
 
-            if (areValuesArray)
+            if (_areValuesArray)
             {
                 return Utils.ArrayEquals(Keys, d.Keys) && Utils.ArrayEquals(Values as Array, d.Values as Array);
             }
-            else
-            {
-                return Utils.ArrayEquals(Keys, d.Keys) && (Values as QTable).Equals(d.Values);
-            }
+            var qTable = Values as QTable;
+            return qTable != null && (Utils.ArrayEquals(Keys, d.Keys) && qTable.Equals(d.Values));
         }
 
         public override int GetHashCode()
@@ -148,14 +141,12 @@ namespace qSharp
                 return false;
             }
 
-            if (areValuesArray)
+            if (_areValuesArray)
             {
                 return Utils.ArrayEquals(Keys, d.Keys) && Utils.ArrayEquals(Values as Array, d.Values as Array);
             }
-            else
-            {
-                return Utils.ArrayEquals(Keys, d.Keys) && (Values as QTable).Equals(d.Values);
-            }
+            var qTable = Values as QTable;
+            return qTable != null && (Utils.ArrayEquals(Keys, d.Keys) && qTable.Equals(d.Values));
         }
 
         /// <summary>
@@ -164,14 +155,11 @@ namespace qSharp
         /// <returns>A System.String that represents the current QDictionary</returns>
         public override string ToString()
         {
-            if (areValuesArray)
+            if (_areValuesArray)
             {
                 return "QDictionary: " + Utils.ArrayToString(Keys) + "!" + Utils.ArrayToString(Values as Array);
             }
-            else
-            {
-                return "QDictionary: " + Utils.ArrayToString(Keys) + "!" + (Values as QTable).ToString();
-            }
+            return "QDictionary: " + Utils.ArrayToString(Keys) + "!" + (Values as QTable);
         }
 
         /// <summary>
@@ -196,7 +184,7 @@ namespace qSharp
             /// </summary>
             public object Key
             {
-                get { return _dictionary.keys.GetValue(_index); }
+                get { return _dictionary._keys.GetValue(_index); }
             }
 
             /// <summary>
@@ -204,19 +192,20 @@ namespace qSharp
             /// </summary>
             public object Value
             {
-                get 
+                get
                 {
-                    if (_dictionary.areValuesArray)
+                    if (!_dictionary._areValuesArray)
                     {
-                        return (_dictionary.values as Array).GetValue(_index);
+                        var qTable = _dictionary._values as QTable;
+                        if (qTable != null) return qTable[_index];
                     }
-                    else
-                    {
-                        return (_dictionary.values as QTable)[_index];
-                    }
+                    var table = _dictionary._values as QTable;
+                    if (table != null)
+                        return table[_index];
+
+                    throw new NotFiniteNumberException(string.Format("Type {0} is unsupported.", _dictionary._values != null ? _dictionary._values.GetType().Name : "null"));
                 }
             }
-
         }
 
         /// <summary>
@@ -240,7 +229,7 @@ namespace qSharp
             public bool MoveNext()
             {
                 _index++;
-                return _index < _dictionary.keys.Length;
+                return _index < _dictionary._keys.Length;
             }
 
             public void Reset()

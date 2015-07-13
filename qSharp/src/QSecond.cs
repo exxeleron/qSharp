@@ -15,7 +15,6 @@
 //
 
 using System;
-using System.Globalization;
 
 namespace qSharp
 {
@@ -25,8 +24,7 @@ namespace qSharp
     public struct QSecond : IDateTime
     {
         private const string NullRepresentation = "0Nv";
-
-        private DateTime datetime;
+        private DateTime _datetime;
 
         /// <summary>
         ///     Creates new QSecond instance using specified q second value.
@@ -45,8 +43,8 @@ namespace qSharp
         public QSecond(DateTime datetime)
             : this()
         {
-            this.datetime = datetime;
-            Value = (int)datetime.TimeOfDay.TotalSeconds;
+            _datetime = datetime;
+            Value = (int) datetime.TimeOfDay.TotalSeconds;
         }
 
         public int Value { get; private set; }
@@ -64,11 +62,11 @@ namespace qSharp
         /// </summary>
         public DateTime ToDateTime()
         {
-            if (datetime == DateTime.MinValue)
+            if (_datetime == DateTime.MinValue)
             {
-                datetime = new DateTime().AddSeconds(Value);
+                _datetime = new DateTime().AddSeconds(Value);
             }
-            return datetime;
+            return _datetime;
         }
 
         /// <summary>
@@ -76,37 +74,34 @@ namespace qSharp
         /// </summary>
         public override string ToString()
         {
-            if (Value != int.MinValue)
-            {
-                int seconds = Math.Abs(Value);
-                int minutes = seconds / 60;
-                int hours = minutes / 60;
+            if (Value == int.MinValue) return NullRepresentation;
+            var seconds = Math.Abs(Value);
+            var minutes = seconds/60;
+            var hours = minutes/60;
 
-                return String.Format("{0}{1:00}:{2:00}:{3:00}", Value < 0 ? "-" : "", hours, minutes % 60, seconds % 60);
-            }
-            return NullRepresentation;
+            return string.Format("{0}{1:00}:{2:00}:{3:00}", Value < 0 ? "-" : "", hours, minutes%60, seconds%60);
         }
 
         /// <summary>
-        /// Returns a QSecond represented by a given string.
+        ///     Returns a QSecond represented by a given string.
         /// </summary>
         /// <param name="date">string representation</param>
         /// <returns>a QSecond instance</returns>
         public static QSecond FromString(string date)
         {
-            if (date == null || date.Length == 0 || date.Equals(NullRepresentation))
+            if (string.IsNullOrWhiteSpace(date) || date.Equals(NullRepresentation))
             {
                 return new QSecond(int.MinValue);
             }
 
             try
             {
-                String[] parts = date.Split(':');
-                int hours = int.Parse(parts[0]);
-                int minutes = int.Parse(parts[1]);
-                int seconds = int.Parse(parts[2]);
+                var parts = date.Split(':');
+                var hours = int.Parse(parts[0]);
+                var minutes = int.Parse(parts[1]);
+                var seconds = int.Parse(parts[2]);
 
-                return new QSecond((seconds + 60 * minutes + 3600 * Math.Abs(hours)) * (hours > 0 ? 1 : -1));
+                return new QSecond((seconds + 60*minutes + 3600*Math.Abs(hours))*(hours > 0 ? 1 : -1));
             }
             catch (Exception e)
             {
@@ -119,19 +114,14 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QSecond.</param>
         /// <returns>true if the specified System.Object is equal to the current QSecond; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             if (!(obj is QSecond))
             {
                 return false;
             }
 
-            return Value == ((QSecond)obj).Value;
+            return Value == ((QSecond) obj).Value;
         }
 
         public override int GetHashCode()

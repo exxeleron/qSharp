@@ -26,8 +26,7 @@ namespace qSharp
     {
         private const string DateFormat = "yyyy.MM.dd'T'HH:mm:ss.fff";
         private const string NullRepresentation = "0Nz";
-
-        private DateTime datetime;
+        private DateTime _datetime;
 
         /// <summary>
         ///     Creates new QDatetime instance using specified q datetime value.
@@ -46,7 +45,7 @@ namespace qSharp
         public QDateTime(DateTime datetime)
             : this()
         {
-            this.datetime = datetime;
+            _datetime = datetime;
             Value = (datetime - QTypes.QEpoch).TotalDays;
         }
 
@@ -65,11 +64,11 @@ namespace qSharp
         /// </summary>
         public DateTime ToDateTime()
         {
-            if (datetime == DateTime.MinValue)
+            if (_datetime == DateTime.MinValue)
             {
-                datetime = new DateTime(2000, 1, 1).AddDays(Value);
+                _datetime = new DateTime(2000, 1, 1).AddDays(Value);
             }
-            return datetime;
+            return _datetime;
         }
 
         /// <summary>
@@ -77,15 +76,11 @@ namespace qSharp
         /// </summary>
         public override string ToString()
         {
-            if (!double.IsNaN(Value))
-            {
-                return ToDateTime().ToString(DateFormat);
-            }
-            return NullRepresentation;
+            return !double.IsNaN(Value) ? ToDateTime().ToString(DateFormat) : NullRepresentation;
         }
 
         /// <summary>
-        /// Returns a QDateTime represented by a given string.
+        ///     Returns a QDateTime represented by a given string.
         /// </summary>
         /// <param name="date">string representation</param>
         /// <returns>a QDateTime instance</returns>
@@ -93,7 +88,9 @@ namespace qSharp
         {
             try
             {
-                return date == null || date.Length == 0 || date.Equals(NullRepresentation) ? new QDateTime(double.NaN) : new QDateTime(DateTime.ParseExact(date, DateFormat, CultureInfo.InvariantCulture));
+                return string.IsNullOrWhiteSpace(date) || date.Equals(NullRepresentation)
+                    ? new QDateTime(double.NaN)
+                    : new QDateTime(DateTime.ParseExact(date, DateFormat, CultureInfo.InvariantCulture));
             }
             catch (Exception e)
             {
@@ -106,26 +103,21 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QDateTime.</param>
         /// <returns>true if the specified System.Object is equal to the current QDateTime; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             if (!(obj is QDateTime))
             {
                 return false;
             }
 
-            return (Double.IsNaN(Value) && Double.IsNaN(((QDateTime)obj).Value)) || Value == ((QDateTime)obj).Value;
+            return (double.IsNaN(Value) && double.IsNaN(((QDateTime) obj).Value)) || Math.Abs(Value - ((QDateTime) obj).Value) < double.Epsilon;
         }
 
         public override int GetHashCode()
         {
-            byte[] data = BitConverter.GetBytes(Value);
-            int x = BitConverter.ToInt32(data, 0);
-            int y = BitConverter.ToInt32(data, 4);
+            var data = BitConverter.GetBytes(Value);
+            var x = BitConverter.ToInt32(data, 0);
+            var y = BitConverter.ToInt32(data, 4);
             return x ^ y;
         }
     }

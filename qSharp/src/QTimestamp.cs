@@ -28,8 +28,7 @@ namespace qSharp
         private const string NanosFormat = "{0:000000}";
         private const string NullRepresentation = "0Np";
         private const long NanosPerDay = 86400000000000L;
-
-        private DateTime datetime;
+        private DateTime _datetime;
 
         /// <summary>
         ///     Creates new QTimestamp instance using specified q timestamp value.
@@ -48,8 +47,8 @@ namespace qSharp
         public QTimestamp(DateTime datetime)
             : this()
         {
-            this.datetime = datetime;
-            Value = (long)(1e6 * (datetime - QTypes.QEpoch).TotalMilliseconds);
+            _datetime = datetime;
+            Value = (long) (1e6*(datetime - QTypes.QEpoch).TotalMilliseconds);
         }
 
         public long Value { get; private set; }
@@ -67,11 +66,11 @@ namespace qSharp
         /// </summary>
         public DateTime ToDateTime()
         {
-            if (datetime == DateTime.MinValue)
+            if (_datetime == DateTime.MinValue)
             {
-                datetime = QTypes.QEpoch.AddMilliseconds((double)Value / 1000000L);
+                _datetime = QTypes.QEpoch.AddMilliseconds((double) Value/1000000L);
             }
-            return datetime;
+            return _datetime;
         }
 
         /// <summary>
@@ -81,13 +80,13 @@ namespace qSharp
         {
             if (Value != long.MinValue)
             {
-                return ToDateTime().ToString(DateFormat) + String.Format(NanosFormat, Value % 1000000L);
+                return ToDateTime().ToString(DateFormat) + string.Format(NanosFormat, Value%1000000L);
             }
             return NullRepresentation;
         }
 
         /// <summary>
-        /// Returns a QTimestamp represented by a given string.
+        ///     Returns a QTimestamp represented by a given string.
         /// </summary>
         /// <param name="date">string representation</param>
         /// <returns>a QTimestamp instance</returns>
@@ -95,15 +94,16 @@ namespace qSharp
         {
             try
             {
-
                 if (date == null || date.Length == 0 || date.Equals(NullRepresentation))
                 {
                     return new QTimestamp(long.MinValue);
                 }
-                else
-                {
-                    return new QTimestamp((long)(1e6 * (DateTime.ParseExact(date.Substring(0, 23), DateFormat, CultureInfo.InvariantCulture) - QTypes.QEpoch).TotalMilliseconds) + long.Parse(date.Substring(23)));
-                }
+                return
+                    new QTimestamp(
+                        (long)
+                            (1e6*
+                             (DateTime.ParseExact(date.Substring(0, 23), DateFormat, CultureInfo.InvariantCulture) -
+                              QTypes.QEpoch).TotalMilliseconds) + long.Parse(date.Substring(23)));
             }
             catch (Exception e)
             {
@@ -116,24 +116,19 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QTimestamp.</param>
         /// <returns>true if the specified System.Object is equal to the current QTimestamp; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             if (!(obj is QTimestamp))
             {
                 return false;
             }
 
-            return Value == ((QTimestamp)obj).Value;
+            return Value == ((QTimestamp) obj).Value;
         }
 
         public override int GetHashCode()
         {
-            return ((int)Value) ^ ((int)(Value >> 32));
+            return ((int) Value) ^ ((int) (Value >> 32));
         }
     }
 }

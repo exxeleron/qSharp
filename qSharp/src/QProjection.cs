@@ -23,7 +23,7 @@ namespace qSharp
     /// </summary>
     public sealed class QProjection : QFunction
     {
-        private readonly Array parameters;
+        private readonly Array _parameters;
 
         /// <summary>
         ///     Creates new QProjection instance with given parameters.
@@ -31,7 +31,7 @@ namespace qSharp
         public QProjection(Array parameters)
             : base((byte) QType.Projection)
         {
-            this.parameters = parameters;
+            this._parameters = parameters;
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace qSharp
         /// </summary>
         public Array Parameters
         {
-            get { return parameters; }
+            get { return _parameters; }
         }
 
         /// <summary>
@@ -47,20 +47,15 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QProjection.</param>
         /// <returns>true if the specified System.Object is equal to the current QProjection; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             var p = obj as QProjection;
             if (p == null)
             {
                 return false;
             }
 
-            return Utils.ArrayEquals(parameters, p.parameters);
+            return Utils.ArrayEquals(_parameters, p._parameters);
         }
 
         /// <summary>
@@ -75,7 +70,7 @@ namespace qSharp
                 return false;
             }
 
-            return Utils.ArrayEquals(parameters, p.parameters);
+            return Utils.ArrayEquals(_parameters, p._parameters);
         }
 
         /// <summary>
@@ -84,7 +79,7 @@ namespace qSharp
         /// <returns>A hash code for the current QProjection</returns>
         public override int GetHashCode()
         {
-            return parameters == null ? 0 : parameters.Length;
+            return _parameters == null ? 0 : _parameters.Length;
         }
 
         /// <summary>
@@ -93,7 +88,7 @@ namespace qSharp
         /// <returns>A System.String that represents the current QLambda</returns>
         public override string ToString()
         {
-            return "QProjection: " + (parameters == null ? "<null>" : Utils.ArrayToString(parameters));
+            return "QProjection: " + (_parameters == null ? "<null>" : Utils.ArrayToString(_parameters));
         }
     }
 }

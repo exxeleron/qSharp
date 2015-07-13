@@ -17,10 +17,33 @@
 namespace qSharp
 {
     /// <summary>
-    /// Encapsulates the q message.
+    ///     Encapsulates the q message.
     /// </summary>
     public struct QMessage
     {
+        /// <summary>
+        ///     Creates new QMessage object.
+        /// </summary>
+        /// <param name="data"> data payload</param>
+        /// <param name="messageType">type of the q message</param>
+        /// <param name="endianess">endianess of the data</param>
+        /// <param name="compressed">true if message was compressed, false otherwise</param>
+        /// <param name="raw">true if  raw message was retrieved, false if message was parsed</param>
+        /// <param name="messageSize">size of the message</param>
+        /// <param name="dataSize">size of the data payload section</param>
+        public QMessage(object data, MessageType messageType, Endianess endianess, bool compressed, bool raw,
+            int messageSize, int dataSize)
+            : this()
+        {
+            Data = data;
+            MessageType = messageType;
+            Endianess = endianess;
+            Compressed = compressed;
+            Raw = raw;
+            MessageSize = messageSize;
+            DataSize = dataSize;
+        }
+
         /// <summary>
         ///     The data payload associated with the message.
         /// </summary>
@@ -55,27 +78,5 @@ namespace qSharp
         ///     Gets a size of data section in the last message.
         /// </summary>
         public int DataSize { get; private set; }
-
-        /// <summary>
-        /// Creates new QMessage object.
-        /// </summary>
-        /// <param name="data"> data payload</param>
-        /// <param name="messageType">type of the q message</param>
-        /// <param name="endianess">endianess of the data</param>
-        /// <param name="compressed">true if message was compressed, false otherwise</param>
-        /// <param name="raw">true if  raw message was retrieved, false if message was parsed</param>
-        /// <param name="messageSize">size of the message</param>
-        /// <param name="dataSize">size of the data payload section</param>
-        public QMessage(object data, MessageType messageType, Endianess endianess, bool compressed, bool raw, int messageSize, int dataSize)
-            : this()
-        {
-            Data = data;
-            MessageType = messageType;
-            Endianess = endianess;
-            Compressed = compressed;
-            Raw = raw;
-            MessageSize = messageSize;
-            DataSize = dataSize;
-        }
     }
 }

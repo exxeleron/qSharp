@@ -15,18 +15,20 @@
 //
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace qSharp.Sample
 {
-    class RemoteConsole
+    internal class RemoteConsole
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            QConnection q = new QBasicConnection(host: (args.Length >= 1) ? args[0] : "localhost",
-                                                 port: (args.Length >= 2) ? Int32.Parse(args[1]) : 5000);
+            IList<string> x = args;
+
+            QConnection q = new QBasicConnection((args.Length >= 1) ? args[0] : "localhost",
+                (args.Length >= 2) ? int.Parse(args[1]) : 5000);
             try
             {
                 q.Open();
@@ -41,16 +43,13 @@ namespace qSharp.Sample
                     {
                         break;
                     }
-                    else
+                    try
                     {
-                        try
-                        {
-                            PrintResult(q.Sync(line));
-                        }
-                        catch (QException e)
-                        {
-                            Console.WriteLine("`" + e.Message);
-                        }
+                        PrintResult(q.Sync(line));
+                    }
+                    catch (QException e)
+                    {
+                        Console.WriteLine("`" + e.Message);
                     }
                 }
             }
@@ -65,7 +64,7 @@ namespace qSharp.Sample
             }
         }
 
-        static void PrintResult(object obj)
+        private static void PrintResult(object obj)
         {
             if (obj == null)
             {
@@ -89,12 +88,12 @@ namespace qSharp.Sample
             }
         }
 
-        static void PrintResult(Array a)
+        private static void PrintResult(Array a)
         {
             Console.WriteLine(Utils.ArrayToString(a));
         }
 
-        static void PrintResult(QDictionary d)
+        private static void PrintResult(QDictionary d)
         {
             foreach (QDictionary.KeyValuePair e in d)
             {
@@ -102,23 +101,23 @@ namespace qSharp.Sample
             }
         }
 
-        static void PrintResult(QTable t)
+        private static void PrintResult(QTable t)
         {
             var rowsToShow = Math.Min(t.RowsCount + 1, 20);
             var dataBuffer = new object[1 + rowsToShow][];
             var columnWidth = new int[t.ColumnsCount];
 
             dataBuffer[0] = new string[t.ColumnsCount];
-            for (int j = 0; j < t.ColumnsCount; j++)
+            for (var j = 0; j < t.ColumnsCount; j++)
             {
                 dataBuffer[0][j] = t.Columns[j];
                 columnWidth[j] = t.Columns[j].Length + 1;
             }
 
-            for (int i = 1; i < rowsToShow; i++)
+            for (var i = 1; i < rowsToShow; i++)
             {
                 dataBuffer[i] = new string[t.ColumnsCount];
-                for (int j = 0; j < t.ColumnsCount; j++)
+                for (var j = 0; j < t.ColumnsCount; j++)
                 {
                     var value = t[i - 1][j].ToString();
                     dataBuffer[i][j] = value;
@@ -127,18 +126,17 @@ namespace qSharp.Sample
             }
 
             var formatting = "";
-            for (int i = 0; i < columnWidth.Length; i++)
+            for (var i = 0; i < columnWidth.Length; i++)
             {
                 formatting += "{" + i + ",-" + columnWidth[i] + "}";
             }
 
             Console.WriteLine(formatting, dataBuffer[0]);
             Console.WriteLine(new string('-', columnWidth.Sum()));
-            for (int i = 1; i < rowsToShow; i++)
+            for (var i = 1; i < rowsToShow; i++)
             {
                 Console.WriteLine(formatting, dataBuffer[i]);
             }
         }
     }
-
 }

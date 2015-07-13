@@ -18,12 +18,12 @@ using System;
 
 namespace qSharp.Sample
 {
-    class Subscriber
+    internal class Subscriber
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            QCallbackConnection q = new QCallbackConnection(host: (args.Length >= 1) ? args[0] : "localhost",
-                                                            port: (args.Length >= 2) ? Int32.Parse(args[1]) : 5000);
+            var q = new QCallbackConnection((args.Length >= 1) ? args[0] : "localhost",
+                (args.Length >= 2) ? int.Parse(args[1]) : 5000);
             try
             {
                 q.DataReceived += OnData;
@@ -53,16 +53,17 @@ namespace qSharp.Sample
             }
         }
 
-        static void OnData(object sender, QMessageEvent message)
+        private static void OnData(object sender, QMessageEvent message)
         {
             Console.WriteLine("Asynchronous message received: " + message.Message.Data);
-            Console.WriteLine("message type: " + message.Message.MessageType + " size: " + message.Message.MessageSize + " isCompressed: " + message.Message.Compressed + " endianess: " + message.Message.Endianess);
+            Console.WriteLine("message type: " + message.Message.MessageType + " size: " + message.Message.MessageSize +
+                              " isCompressed: " + message.Message.Compressed + " endianess: " +
+                              message.Message.Endianess);
         }
 
-        static void OnError(object sender, QErrorEvent error)
+        private static void OnError(object sender, QErrorEvent error)
         {
             Console.Error.WriteLine("Error received via callback: " + error.Cause.Message);
         }
-
     }
 }

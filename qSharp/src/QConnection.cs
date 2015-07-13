@@ -14,8 +14,7 @@
 //   limitations under the License.
 //
 
-using System;
-
+using System.Text;
 
 namespace qSharp
 {
@@ -48,7 +47,7 @@ namespace qSharp
         int Port { get; }
         string Username { get; }
         string Password { get; }
-        System.Text.Encoding Encoding { get; }
+        Encoding Encoding { get; }
         int ProtocolVersion { get; }
 
         /// <summary>
@@ -67,7 +66,8 @@ namespace qSharp
         void Close();
 
         /// <summary>
-        ///     Check whether connection with the remote q host has been established. Note that this function doesn't check whether the connection is still active.
+        ///     Check whether connection with the remote q host has been established. Note that this function doesn't check whether
+        ///     the connection is still active.
         /// </summary>
         /// <returns>true if connection with remote host is established, false otherwise</returns>
         bool IsConnected();
@@ -100,7 +100,10 @@ namespace qSharp
         /// <summary>
         ///     Reads next message from the remote q service.
         /// </summary>
-        /// <param name="dataOnly">if true returns only data part of the message, if false retuns data and message meta-information encapsulated in QMessage</param>
+        /// <param name="dataOnly">
+        ///     if true returns only data part of the message, if false retuns data and message meta-information
+        ///     encapsulated in QMessage
+        /// </param>
         /// <param name="raw">indicates whether message should be parsed to C# object or returned as an array of bytes</param>
         /// <returns>deserialized response from the remote q service</returns>
         object Receive(bool dataOnly = true, bool raw = false);

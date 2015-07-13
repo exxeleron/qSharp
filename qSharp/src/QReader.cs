@@ -26,16 +26,13 @@ namespace qSharp
     /// </summary>
     public sealed class QReader
     {
-        private const string PROTOCOL_DEBUG_ENV = "QSHARP_PROTOCOL_DEBUG";
-
-        private readonly Encoding encoding;
-        private readonly Stream stream;
-
-        private byte[] header;
-        private byte[] rawData;
-        private EndianBinaryReader reader;
-
-        private int maxReadingChunk;
+        private const string ProtocolDebugEnv = "QSHARP_PROTOCOL_DEBUG";
+        private readonly Encoding _encoding;
+        private readonly int _maxReadingChunk;
+        private readonly Stream _stream;
+        private byte[] _header;
+        private byte[] _rawData;
+        private EndianBinaryReader _reader;
 
         /// <summary>
         ///     Initializes a new QReader instance.
@@ -45,9 +42,9 @@ namespace qSharp
         /// <param name="maxReadingChunk">Maxium number of bytes read in a single chunk from stream</param>
         public QReader(Stream stream, Encoding encoding, int maxReadingChunk)
         {
-            this.stream = stream;
-            this.encoding = encoding;
-            this.maxReadingChunk = maxReadingChunk;
+            _stream = stream;
+            _encoding = encoding;
+            _maxReadingChunk = maxReadingChunk;
         }
 
         /// <summary>
@@ -57,30 +54,30 @@ namespace qSharp
         /// <returns>QMessage instance encapsulating a deserialized message.</returns>
         public QMessage Read(bool raw = false)
         {
-            header = ReadFully(8);
-            Endianess endianess = (Endianess)header[0];
-            MessageType messageType = (MessageType)header[1];
-            bool compressed = header[2] == 1;
+            _header = ReadFully(8);
+            var endianess = (Endianess) _header[0];
+            var messageType = (MessageType) _header[1];
+            var compressed = _header[2] == 1;
 
-            reader = new EndianBinaryReader(header) { Endianess = endianess };
-            reader.Seek(4, SeekOrigin.Begin);
-            int messageSize = reader.ReadInt32();
-            int dataSize = Math.Max(messageSize - 8, 0);
+            _reader = new EndianBinaryReader(_header) {Endianess = endianess};
+            _reader.Seek(4, SeekOrigin.Begin);
+            var messageSize = _reader.ReadInt32();
+            var dataSize = Math.Max(messageSize - 8, 0);
 
-            rawData = ReadFully(dataSize);
+            _rawData = ReadFully(dataSize);
             if (raw)
             {
-                return new QMessage(rawData, messageType, endianess, compressed, raw, messageSize, dataSize);
+                return new QMessage(_rawData, messageType, endianess, compressed, raw, messageSize, dataSize);
             }
 
-            var data = rawData;
+            var data = _rawData;
             if (compressed)
             {
-                data = Uncompress(rawData, endianess);
+                data = Uncompress(_rawData, endianess);
                 dataSize = data.Length;
             }
 
-            reader = new EndianBinaryReader(data, endianess);
+            _reader = new EndianBinaryReader(data, endianess);
 
             try
             {
@@ -89,29 +86,29 @@ namespace qSharp
             catch (QReaderException e)
             {
                 ProtocolDebug(e);
-                throw e;
+                throw;
             }
-            catch (QException e)
+            catch (QException)
             {
-                throw e;
+                throw;
             }
             catch (Exception e)
             {
                 ProtocolDebug(e);
-                throw e;
+                throw;
             }
         }
 
         private void ProtocolDebug(Exception e)
         {
-            var debugPath = System.Environment.GetEnvironmentVariable(PROTOCOL_DEBUG_ENV);
+            var debugPath = Environment.GetEnvironmentVariable(ProtocolDebugEnv);
             if (!string.IsNullOrEmpty(debugPath) && debugPath.Trim() != "")
             {
-                debugPath += "\\" + PROTOCOL_DEBUG_ENV + "." + DateTime.UtcNow.Ticks;
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(debugPath))
+                debugPath += "\\" + ProtocolDebugEnv + "." + DateTime.UtcNow.Ticks;
+                using (var file = new StreamWriter(debugPath))
                 {
-                    file.Write(BitConverter.ToString(header).Replace("-", ""));
-                    file.WriteLine(BitConverter.ToString(rawData).Replace("-", ""));
+                    file.Write(BitConverter.ToString(_header).Replace("-", ""));
+                    file.WriteLine(BitConverter.ToString(_rawData).Replace("-", ""));
                     file.WriteLine(e.ToString());
                 }
             }
@@ -121,10 +118,10 @@ namespace qSharp
         {
             var buffer = new byte[length];
 
-            int read = 0;
+            var read = 0;
             int chunk;
 
-            while ((chunk = stream.Read(buffer, read, Math.Min(maxReadingChunk, buffer.Length - read))) > 0)
+            while ((chunk = _stream.Read(buffer, read, Math.Min(_maxReadingChunk, buffer.Length - read))) > 0)
             {
                 read += chunk;
 
@@ -140,11 +137,11 @@ namespace qSharp
         {
             // size of the uncompressed message is encoded on first 4 bytes
             // size has to be decreased by header length (8 bytes)
-            int uncompressedSize = -8 +
+            var uncompressedSize = -8 +
                                    (int)
-                                   (endianess == Endianess.BigEndian
-                                        ? EndianBinaryReader.FromBigEndian(compressed, 0, 4)
-                                        : EndianBinaryReader.FromLittleEndian(compressed, 0, 4));
+                                       (endianess == Endianess.BigEndian
+                                           ? EndianBinaryReader.FromBigEndian(compressed, 0, 4)
+                                           : EndianBinaryReader.FromLittleEndian(compressed, 0, 4));
 
             if (uncompressedSize <= 0)
             {
@@ -154,7 +151,7 @@ namespace qSharp
             var uncompressed = new byte[uncompressedSize];
             var buffer = new int[256];
             short i = 0;
-            int n = 0;
+            var n = 0;
             int f = 0, s = 0, p = 0, d = 4;
 
             while (s < uncompressedSize)
@@ -166,11 +163,11 @@ namespace qSharp
                 }
                 if ((f & i) != 0)
                 {
-                    int r = buffer[0xff & compressed[d++]];
+                    var r = buffer[0xff & compressed[d++]];
                     uncompressed[s++] = uncompressed[r++];
                     uncompressed[s++] = uncompressed[r++];
                     n = 0xff & compressed[d++];
-                    for (int m = 0; m < n; m++)
+                    for (var m = 0; m < n; m++)
                     {
                         uncompressed[s + m] = uncompressed[r + m];
                     }
@@ -199,7 +196,7 @@ namespace qSharp
 
         private object ReadObject()
         {
-            QType qtype = (QType)reader.ReadSByte();
+            var qtype = (QType) _reader.ReadSByte();
 
             switch (qtype)
             {
@@ -273,39 +270,39 @@ namespace qSharp
             switch (qtype)
             {
                 case QType.Bool:
-                    return reader.ReadBoolean();
+                    return _reader.ReadBoolean();
                 case QType.Byte:
-                    return reader.ReadByte();
+                    return _reader.ReadByte();
                 case QType.Guid:
-                    return reader.ReadGuid();
+                    return _reader.ReadGuid();
                 case QType.Short:
-                    return reader.ReadInt16();
+                    return _reader.ReadInt16();
                 case QType.Int:
-                    return reader.ReadInt32();
+                    return _reader.ReadInt32();
                 case QType.Long:
-                    return reader.ReadInt64();
+                    return _reader.ReadInt64();
                 case QType.Float:
-                    return reader.ReadSingle();
+                    return _reader.ReadSingle();
                 case QType.Double:
-                    return reader.ReadDouble();
+                    return _reader.ReadDouble();
                 case QType.Char:
-                    return reader.ReadChar();
+                    return _reader.ReadChar();
                 case QType.Timestamp:
-                    return new QTimestamp(reader.ReadInt64());
+                    return new QTimestamp(_reader.ReadInt64());
                 case QType.Month:
-                    return new QMonth(reader.ReadInt32());
+                    return new QMonth(_reader.ReadInt32());
                 case QType.Date:
-                    return new QDate(reader.ReadInt32());
+                    return new QDate(_reader.ReadInt32());
                 case QType.Datetime:
-                    return new QDateTime(reader.ReadDouble());
+                    return new QDateTime(_reader.ReadDouble());
                 case QType.Timespan:
-                    return new QTimespan(reader.ReadInt64());
+                    return new QTimespan(_reader.ReadInt64());
                 case QType.Minute:
-                    return new QMinute(reader.ReadInt32());
+                    return new QMinute(_reader.ReadInt32());
                 case QType.Second:
-                    return new QSecond(reader.ReadInt32());
+                    return new QSecond(_reader.ReadInt32());
                 case QType.Time:
-                    return new QTime(reader.ReadInt32());
+                    return new QTime(_reader.ReadInt32());
             }
 
             throw new QReaderException("Unable to deserialize q atom of type: " + qtype);
@@ -313,11 +310,11 @@ namespace qSharp
 
         private object[] ReadGeneralList()
         {
-            reader.ReadByte(); // attributes
-            int length = reader.ReadInt32();
+            _reader.ReadByte(); // attributes
+            var length = _reader.ReadInt32();
             var list = new object[length];
 
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 list[i] = ReadObject();
             }
@@ -327,175 +324,175 @@ namespace qSharp
 
         private object ReadList(QType qtype)
         {
-            reader.ReadByte(); // attributes
-            int length = reader.ReadInt32();
+            _reader.ReadByte(); // attributes
+            var length = _reader.ReadInt32();
 
             switch (qtype)
             {
                 case QType.BoolList:
+                {
+                    var list = new bool[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new bool[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = reader.ReadBoolean();
-                        }
-                        return list;
+                        list[i] = _reader.ReadBoolean();
                     }
+                    return list;
+                }
                 case QType.ByteList:
+                {
+                    var list = new byte[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new byte[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = reader.ReadByte();
-                        }
-                        return list;
+                        list[i] = _reader.ReadByte();
                     }
+                    return list;
+                }
                 case QType.GuidList:
+                {
+                    var list = new Guid[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new Guid[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = reader.ReadGuid();
-                        }
-                        return list;
+                        list[i] = _reader.ReadGuid();
                     }
+                    return list;
+                }
                 case QType.ShortList:
+                {
+                    var list = new short[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new short[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = reader.ReadInt16();
-                        }
-                        return list;
+                        list[i] = _reader.ReadInt16();
                     }
+                    return list;
+                }
                 case QType.IntList:
+                {
+                    var list = new int[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new int[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = reader.ReadInt32();
-                        }
-                        return list;
+                        list[i] = _reader.ReadInt32();
                     }
+                    return list;
+                }
                 case QType.LongList:
+                {
+                    var list = new long[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new long[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = reader.ReadInt64();
-                        }
-                        return list;
+                        list[i] = _reader.ReadInt64();
                     }
+                    return list;
+                }
                 case QType.FloatList:
+                {
+                    var list = new float[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new float[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = reader.ReadSingle();
-                        }
-                        return list;
+                        list[i] = _reader.ReadSingle();
                     }
+                    return list;
+                }
                 case QType.DoubleList:
+                {
+                    var list = new double[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new double[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = reader.ReadDouble();
-                        }
-                        return list;
+                        list[i] = _reader.ReadDouble();
                     }
+                    return list;
+                }
                 case QType.String:
-                    {
-                        return encoding.GetChars(reader.ReadBytes(length));
-                    }
+                {
+                    return _encoding.GetChars(_reader.ReadBytes(length));
+                }
                 case QType.SymbolList:
+                {
+                    var list = new string[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new string[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = ReadSymbol();
-                        }
-                        return list;
+                        list[i] = ReadSymbol();
                     }
+                    return list;
+                }
                 case QType.TimestampList:
+                {
+                    var list = new QTimestamp[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new QTimestamp[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = new QTimestamp(reader.ReadInt64());
-                        }
-                        return list;
+                        list[i] = new QTimestamp(_reader.ReadInt64());
                     }
+                    return list;
+                }
                 case QType.MonthList:
+                {
+                    var list = new QMonth[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new QMonth[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = new QMonth(reader.ReadInt32());
-                        }
-                        return list;
+                        list[i] = new QMonth(_reader.ReadInt32());
                     }
+                    return list;
+                }
                 case QType.DateList:
+                {
+                    var list = new QDate[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new QDate[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = new QDate(reader.ReadInt32());
-                        }
-                        return list;
+                        list[i] = new QDate(_reader.ReadInt32());
                     }
+                    return list;
+                }
                 case QType.DatetimeList:
+                {
+                    var list = new QDateTime[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new QDateTime[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = new QDateTime(reader.ReadDouble());
-                        }
-                        return list;
+                        list[i] = new QDateTime(_reader.ReadDouble());
                     }
+                    return list;
+                }
                 case QType.TimespanList:
+                {
+                    var list = new QTimespan[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new QTimespan[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = new QTimespan(reader.ReadInt64());
-                        }
-                        return list;
+                        list[i] = new QTimespan(_reader.ReadInt64());
                     }
+                    return list;
+                }
                 case QType.MinuteList:
+                {
+                    var list = new QMinute[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new QMinute[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = new QMinute(reader.ReadInt32());
-                        }
-                        return list;
+                        list[i] = new QMinute(_reader.ReadInt32());
                     }
+                    return list;
+                }
                 case QType.SecondList:
+                {
+                    var list = new QSecond[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new QSecond[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = new QSecond(reader.ReadInt32());
-                        }
-                        return list;
+                        list[i] = new QSecond(_reader.ReadInt32());
                     }
+                    return list;
+                }
                 case QType.TimeList:
+                {
+                    var list = new QTime[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        var list = new QTime[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            list[i] = new QTime(reader.ReadInt32());
-                        }
-                        return list;
+                        list[i] = new QTime(_reader.ReadInt32());
                     }
+                    return list;
+                }
             }
             throw new QReaderException("Unable to deserialize q vector of type: " + qtype);
         }
 
         private string ReadSymbol()
         {
-            return reader.ReadSymbol(encoding);
+            return _reader.ReadSymbol(_encoding);
         }
 
         private object ReadError()
@@ -508,54 +505,54 @@ namespace qSharp
             switch (qtype)
             {
                 case QType.Lambda:
-                    {
-                        reader.ReadSymbol(encoding); // ignore context
-                        var expression = (char[])ReadObject();
-                        return new QLambda(new string(expression));
-                    }
+                {
+                    _reader.ReadSymbol(_encoding); // ignore context
+                    var expression = (char[]) ReadObject();
+                    return new QLambda(new string(expression));
+                }
                 case QType.Projection:
+                {
+                    var length = _reader.ReadInt32();
+                    var parameters = new object[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        int length = reader.ReadInt32();
-                        var parameters = new object[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            parameters[i] = ReadObject();
-                        }
-                        return new QProjection(parameters);
+                        parameters[i] = ReadObject();
                     }
+                    return new QProjection(parameters);
+                }
                 case QType.UnaryPrimitiveFunc:
-                    {
-                        var code = reader.ReadByte();
-                        return code == 0 ? null : QFunction.Create((byte)qtype);
-                    }
+                {
+                    var code = _reader.ReadByte();
+                    return code == 0 ? null : QFunction.Create((byte) qtype);
+                }
                 case QType.BinaryPrimitiveFunc:
                 case QType.TernaryOperatorFunc:
-                    {
-                        var code = reader.ReadByte(); // ignore
-                        return QFunction.Create((byte)qtype);
-                    }
+                {
+                    var code = _reader.ReadByte(); // ignore
+                    return QFunction.Create((byte) qtype);
+                }
                 case QType.CompositionFunc:
+                {
+                    var length = _reader.ReadInt32();
+                    var parameters = new object[length];
+                    for (var i = 0; i < length; i++)
                     {
-                        int length = reader.ReadInt32();
-                        var parameters = new object[length];
-                        for (int i = 0; i < length; i++)
-                        {
-                            parameters[i] = ReadObject();
-                        }
-                        return QFunction.Create((byte)qtype);
+                        parameters[i] = ReadObject();
                     }
+                    return QFunction.Create((byte) qtype);
+                }
                 default:
-                    {
-                        ReadObject(); // ignore
-                        return QFunction.Create((byte)qtype);
-                    }
+                {
+                    ReadObject(); // ignore
+                    return QFunction.Create((byte) qtype);
+                }
             }
         }
 
         private object ReadDictionary()
         {
-            object keys = ReadObject();
-            object values = ReadObject();
+            var keys = ReadObject();
+            var values = ReadObject();
 
             if (keys is Array && values is Array)
             {
@@ -575,8 +572,8 @@ namespace qSharp
 
         private QTable ReadTable()
         {
-            reader.ReadByte(); // attributes
-            reader.ReadByte(); // dict type stamp
+            _reader.ReadByte(); // attributes
+            _reader.ReadByte(); // dict type stamp
             return new QTable(ReadObject() as string[], ReadObject() as Array);
         }
     }

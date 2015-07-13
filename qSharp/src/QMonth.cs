@@ -26,8 +26,7 @@ namespace qSharp
     {
         private const string DateFormat = "yyyy.MM'm'";
         private const string NullRepresentation = "0Nm";
-
-        private DateTime datetime;
+        private DateTime _datetime;
 
         /// <summary>
         ///     Creates new QMonth instance using specified q month value.
@@ -46,7 +45,7 @@ namespace qSharp
         public QMonth(DateTime datetime)
             : this()
         {
-            this.datetime = datetime;
+            _datetime = datetime;
             Value = (datetime.Year - 2000)*12 + datetime.Month - 1;
         }
 
@@ -65,11 +64,11 @@ namespace qSharp
         /// </summary>
         public DateTime ToDateTime()
         {
-            if (datetime == DateTime.MinValue)
+            if (_datetime == DateTime.MinValue)
             {
-                datetime = new DateTime(2000, 1, 1).AddMonths(Value);
+                _datetime = new DateTime(2000, 1, 1).AddMonths(Value);
             }
-            return datetime;
+            return _datetime;
         }
 
         /// <summary>
@@ -85,7 +84,7 @@ namespace qSharp
         }
 
         /// <summary>
-        /// Returns a QMonth represented by a given string.
+        ///     Returns a QMonth represented by a given string.
         /// </summary>
         /// <param name="date">string representation</param>
         /// <returns>a QMonth instance</returns>
@@ -93,7 +92,9 @@ namespace qSharp
         {
             try
             {
-                return date == null || date.Length == 0 || date.Equals(NullRepresentation) ? new QMonth(int.MinValue) : new QMonth(DateTime.ParseExact(date, DateFormat, CultureInfo.InvariantCulture));
+                return date == null || date.Length == 0 || date.Equals(NullRepresentation)
+                    ? new QMonth(int.MinValue)
+                    : new QMonth(DateTime.ParseExact(date, DateFormat, CultureInfo.InvariantCulture));
             }
             catch (Exception e)
             {
@@ -106,19 +107,14 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QMonth.</param>
         /// <returns>true if the specified System.Object is equal to the current QMonth; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             if (!(obj is QMonth))
             {
                 return false;
             }
 
-            return Value == ((QMonth)obj).Value;
+            return Value == ((QMonth) obj).Value;
         }
 
         public override int GetHashCode()

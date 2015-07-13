@@ -15,7 +15,6 @@
 //
 
 using System;
-using System.Globalization;
 
 namespace qSharp
 {
@@ -25,8 +24,7 @@ namespace qSharp
     public struct QTime : IDateTime
     {
         private const string NullRepresentation = "0Nt";
-
-        private DateTime datetime;
+        private DateTime _datetime;
 
         /// <summary>
         ///     Creates new QTime instance using specified q time value.
@@ -45,8 +43,8 @@ namespace qSharp
         public QTime(DateTime datetime)
             : this()
         {
-            this.datetime = datetime;
-            Value = (int)datetime.TimeOfDay.TotalMilliseconds;
+            this._datetime = datetime;
+            Value = (int) datetime.TimeOfDay.TotalMilliseconds;
         }
 
         public int Value { get; private set; }
@@ -64,11 +62,11 @@ namespace qSharp
         /// </summary>
         public DateTime ToDateTime()
         {
-            if (datetime == DateTime.MinValue)
+            if (_datetime == DateTime.MinValue)
             {
-                datetime = new DateTime().AddMilliseconds(Value);
+                _datetime = new DateTime().AddMilliseconds(Value);
             }
-            return datetime;
+            return _datetime;
         }
 
         /// <summary>
@@ -78,36 +76,37 @@ namespace qSharp
         {
             if (Value != int.MinValue)
             {
-                int millis = Math.Abs(Value);
-                int seconds = millis / 1000;
-                int minutes = seconds / 60;
-                int hours = minutes / 60;
+                var millis = Math.Abs(Value);
+                var seconds = millis/1000;
+                var minutes = seconds/60;
+                var hours = minutes/60;
 
-                return String.Format("{0}{1:00}:{2:00}:{3:00}.{4:000}", Value < 0 ? "-" : "", hours, minutes % 60, seconds % 60, millis % 1000);
+                return string.Format("{0}{1:00}:{2:00}:{3:00}.{4:000}", Value < 0 ? "-" : "", hours, minutes%60,
+                    seconds%60, millis%1000);
             }
             return NullRepresentation;
         }
 
         /// <summary>
-        /// Returns a QTime represented by a given string.
+        ///     Returns a QTime represented by a given string.
         /// </summary>
         /// <param name="date">string representation</param>
         /// <returns>a QTime instance</returns>
         public static QTime FromString(string date)
         {
-            if (date == null || date.Length == 0 || date.Equals(NullRepresentation))
+            if (string.IsNullOrWhiteSpace(date) || date.Equals(NullRepresentation))
             {
                 return new QTime(int.MinValue);
             }
 
             try
             {
-                String[] parts = date.Split(new char[]{ ':' , '.'});
-                int hours = int.Parse(parts[0]);
-                int minutes = int.Parse(parts[1]);
-                int seconds = int.Parse(parts[2]);
-                int millis = int.Parse(parts[3]);
-                return new QTime((millis + 1000 * seconds + 60000 * minutes + 3600000 * Math.Abs(hours)) * (hours > 0 ? 1 : -1));
+                var parts = date.Split(':', '.');
+                var hours = int.Parse(parts[0]);
+                var minutes = int.Parse(parts[1]);
+                var seconds = int.Parse(parts[2]);
+                var millis = int.Parse(parts[3]);
+                return new QTime((millis + 1000*seconds + 60000*minutes + 3600000*Math.Abs(hours))*(hours > 0 ? 1 : -1));
             }
             catch (Exception e)
             {
@@ -120,19 +119,14 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QTime.</param>
         /// <returns>true if the specified System.Object is equal to the current QTime; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             if (!(obj is QTime))
             {
                 return false;
             }
 
-            return Value == ((QTime)obj).Value;
+            return Value == ((QTime) obj).Value;
         }
 
         public override int GetHashCode()

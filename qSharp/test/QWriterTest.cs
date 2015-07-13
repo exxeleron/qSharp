@@ -28,16 +28,16 @@ namespace qSharp.test
         public void TestObjectSerializationQ2()
         {
             var expressions = new QExpressions(new Dictionary<string, string> {{"q2", "..\\..\\test\\QExpressions.out"}});
-            foreach (string expr in expressions.GetExpressions("q2"))
+            foreach (var expr in expressions.GetExpressions("q2"))
             {
                 var stream = new MemoryStream();
                 var reader = new BinaryReader(stream);
                 var writer = new QWriter(stream, Encoding.ASCII, 1);
-                int dataSize = writer.Write(expressions.GetReferenceObject("q2", expr), MessageType.Sync);
+                var dataSize = writer.Write(expressions.GetReferenceObject("q2", expr), MessageType.Sync);
                 stream.Seek(8, SeekOrigin.Begin);
 
                 Assert.AreEqual(expressions.GetBinaryExpression("q2", expr), reader.ReadBytes(dataSize),
-                                "Serialization failed for q expression: " + expr);
+                    "Serialization failed for q expression: " + expr);
 
                 stream.Close();
             }
@@ -48,16 +48,16 @@ namespace qSharp.test
         {
             var expressions =
                 new QExpressions(new Dictionary<string, string> {{"q3", "..\\..\\test\\QExpressions.3.out"}});
-            foreach (string expr in expressions.GetExpressions("q3"))
+            foreach (var expr in expressions.GetExpressions("q3"))
             {
                 var stream = new MemoryStream();
                 var reader = new BinaryReader(stream);
                 var writer = new QWriter(stream, Encoding.ASCII, 3);
-                int dataSize = writer.Write(expressions.GetReferenceObject("q3", expr), MessageType.Sync);
+                var dataSize = writer.Write(expressions.GetReferenceObject("q3", expr), MessageType.Sync);
                 stream.Seek(8, SeekOrigin.Begin);
 
                 Assert.AreEqual(expressions.GetBinaryExpression("q3", expr), reader.ReadBytes(dataSize),
-                                "Serialization failed for q expression: " + expr);
+                    "Serialization failed for q expression: " + expr);
 
                 stream.Close();
             }

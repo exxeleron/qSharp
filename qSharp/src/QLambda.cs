@@ -25,15 +25,14 @@ namespace qSharp
     public sealed class QLambda : QFunction
     {
         private const string LambdaRegex = @"\s*(k\))?\s*\{.*\}";
-
-        private readonly string expression;
+        private readonly string _expression;
 
         /// <summary>
         ///     Creates new QLambda instance with given body. Note that expression is trimmed and required to be enclosed
         ///     in { and } brackets.
         /// </summary>
         public QLambda(string expression)
-            : base((byte)QType.Lambda)
+            : base((byte) QType.Lambda)
         {
             if (expression == null)
             {
@@ -51,7 +50,7 @@ namespace qSharp
                 throw new ArgumentException("Invalid lambda expresion: " + expression);
             }
 
-            this.expression = expression;
+            _expression = expression;
         }
 
         /// <summary>
@@ -59,7 +58,7 @@ namespace qSharp
         /// </summary>
         public string Expression
         {
-            get { return expression; }
+            get { return _expression; }
         }
 
         /// <summary>
@@ -67,7 +66,7 @@ namespace qSharp
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QLambda.</param>
         /// <returns>true if the specified System.Object is equal to the current QLambda; otherwise, false</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
             if (obj == null)
             {
@@ -80,7 +79,7 @@ namespace qSharp
                 return false;
             }
 
-            return expression.Equals(l.expression);
+            return _expression.Equals(l._expression);
         }
 
         /// <summary>
@@ -95,7 +94,7 @@ namespace qSharp
                 return false;
             }
 
-            return expression.Equals(l.expression);
+            return _expression.Equals(l._expression);
         }
 
         /// <summary>
@@ -104,7 +103,7 @@ namespace qSharp
         /// <returns>A hash code for the current QLambda</returns>
         public override int GetHashCode()
         {
-            return expression.GetHashCode();
+            return _expression.GetHashCode();
         }
 
         /// <summary>
@@ -113,7 +112,7 @@ namespace qSharp
         /// <returns>A System.String that represents the current QLambda</returns>
         public override string ToString()
         {
-            return "QLambda: " + expression;
+            return "QLambda: " + _expression;
         }
     }
 }

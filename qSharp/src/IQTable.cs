@@ -15,21 +15,22 @@
 //
 
 using System;
-using System.Windows.Forms;
 
-namespace qSharp.Sample
+namespace qSharp
 {
-    internal static class TickClient
+    /// <summary>
+    ///     Common interface for the q date/time types.
+    /// </summary>
+    public interface IQTable
     {
         /// <summary>
-        ///     The main entry point for the application.
+        ///     Gets a number of rows in current QTable.
         /// </summary>
-        [STAThread]
-        private static void Main()
-        {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new TickClientForm());
-        }
+        int RowsCount { get; }
+
+        /// <summary>
+        ///     Gets a number of columns in current QTable.
+        /// </summary>
+        int ColumnsCount { get;  }       
     }
 }

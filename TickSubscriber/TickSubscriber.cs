@@ -18,12 +18,12 @@ using System;
 
 namespace qSharp.Sample
 {
-    class TickSubscriber
+    internal class TickSubscriber
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            QCallbackConnection q = new QCallbackConnection(host: (args.Length >= 1) ? args[0] : "localhost",
-                                                            port: (args.Length >= 2) ? Int32.Parse(args[1]) : 17010);
+            var q = new QCallbackConnection((args.Length >= 1) ? args[0] : "localhost",
+                (args.Length >= 2) ? int.Parse(args[1]) : 17010);
             try
             {
                 q.DataReceived += OnData;
@@ -32,8 +32,8 @@ namespace qSharp.Sample
                 Console.WriteLine("conn: " + q + "  protocol: " + q.ProtocolVersion);
                 Console.WriteLine("Press <ENTER> to close application");
 
-                Object response = q.Sync(".u.sub", "trade", ""); // subscribe to tick
-                QTable model = (QTable)((Object[])response)[1]; // get table model
+                var response = q.Sync(".u.sub", "trade", ""); // subscribe to tick
+                var model = (QTable) ((object[]) response)[1]; // get table model
 
                 q.StartListener();
                 Console.ReadLine();
@@ -50,16 +50,16 @@ namespace qSharp.Sample
             }
         }
 
-        static void OnData(object sender, QMessageEvent message)
+        private static void OnData(object sender, QMessageEvent message)
         {
-            Object data = message.Message.Data;
-            if (data is Object[])
+            var data = message.Message.Data;
+            if (data is object[])
             {
                 // unpack upd message
-                Object[] args = ((Object[])data);
+                var args = ((object[]) data);
                 if (args.Length == 3 && args[0].Equals("upd") && args[2] is QTable)
                 {
-                    QTable table = (QTable)args[2];
+                    var table = (QTable) args[2];
                     foreach (QTable.Row row in table)
                     {
                         Console.WriteLine(row);
@@ -68,7 +68,7 @@ namespace qSharp.Sample
             }
         }
 
-        static void OnError(object sender, QErrorEvent error)
+        private static void OnError(object sender, QErrorEvent error)
         {
             Console.Error.WriteLine("Error received via callback: " + error.Cause.Message);
         }

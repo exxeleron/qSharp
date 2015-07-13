@@ -25,19 +25,19 @@ namespace qSharp.test
         public void TestQKeyedTableConstruction()
         {
             var kt1 = new QKeyedTable(new QTable(new[] {"eid"}, new object[] {new[] {1001, 1002, 1003}}),
-                                      new QTable(new[] {"pos", "dates"},
-                                                 new object[]
-                                                     {
-                                                         new[] {"d1", "d2", "d3"},
-                                                         new[] {new QDate(366), new QDate(121), new QDate(int.MinValue)}
-                                                     }));
+                new QTable(new[] {"pos", "dates"},
+                    new object[]
+                    {
+                        new[] {"d1", "d2", "d3"},
+                        new[] {new QDate(366), new QDate(121), new QDate(int.MinValue)}
+                    }));
             var kt2 = new QKeyedTable(new[] {"pos", "dates", "eid"}, new[] {"eid"},
-                                      new object[]
-                                          {
-                                              new[] {"d1", "d2", "d3"},
-                                              new[] {new QDate(366), new QDate(121), new QDate(int.MinValue)},
-                                              new[] {1001, 1002, 1003}
-                                          });
+                new object[]
+                {
+                    new[] {"d1", "d2", "d3"},
+                    new[] {new QDate(366), new QDate(121), new QDate(int.MinValue)},
+                    new[] {1001, 1002, 1003}
+                });
             Assert.IsTrue(kt1.Equals(kt2));
         }
     }
