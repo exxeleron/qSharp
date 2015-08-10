@@ -24,7 +24,7 @@ namespace qSharp
     /// <summary>
     ///     Represents a q keyed table type.
     /// </summary>
-    public sealed class QKeyedTable : IEnumerable, IQTable
+    public sealed class QKeyedTable : IEnumerable<QKeyedTable.KeyValuePair>, IQTable
     {
         private readonly QTable _keys;
         private readonly QTable _values;
@@ -143,9 +143,18 @@ namespace qSharp
         ///     Returns an enumerator that iterates through a table keys and values.
         /// </summary>
         /// <returns>An QKeyedTableEnumerator object that can be used to iterate through the table</returns>
-        public IEnumerator GetEnumerator()
+        public IEnumerator<QKeyedTable.KeyValuePair> GetEnumerator()
         {
             return new QKeyedTableEnumerator(this);
+        }
+
+        /// <summary>
+        ///     Returns an enumerator that iterates through rows in a table.
+        /// </summary>
+        /// <returns>An QKeyedTableEnumerator object that can be used to iterate through the table</returns>
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
 
         /// <summary>
@@ -196,7 +205,7 @@ namespace qSharp
         /// <summary>
         ///     Defines a key/value pair that can be retrieved.
         /// </summary>
-        private struct KeyValuePair
+        public struct KeyValuePair
         {
             private readonly int _index;
             private readonly QKeyedTable _kt;
@@ -230,7 +239,7 @@ namespace qSharp
         /// <summary>
         ///     Iterator over pairs [key, value] stored in a keyed table.
         /// </summary>
-        private sealed class QKeyedTableEnumerator : IEnumerator
+        private sealed class QKeyedTableEnumerator : IEnumerator<QKeyedTable.KeyValuePair>
         {
             private readonly QKeyedTable _kt;
             private int _index = -1;
@@ -240,9 +249,14 @@ namespace qSharp
                 _kt = table;
             }
 
-            public object Current
+            public QKeyedTable.KeyValuePair Current
             {
                 get { return new KeyValuePair(_kt, _index); }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return Current; }
             }
 
             public bool MoveNext()
@@ -252,6 +266,11 @@ namespace qSharp
             }
 
             public void Reset()
+            {
+                _index = -1;
+            }
+
+            public void Dispose()
             {
                 _index = -1;
             }

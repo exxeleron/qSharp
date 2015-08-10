@@ -24,14 +24,14 @@ namespace qSharp.test
         [Test]
         public void TestQKeyedTableConstruction()
         {
-            var kt1 = new QKeyedTable(new QTable(new[] {"eid"}, new object[] {new[] {1001, 1002, 1003}}),
-                new QTable(new[] {"pos", "dates"},
+            var kt1 = new QKeyedTable(new QTable(new[] { "eid" }, new object[] { new[] { 1001, 1002, 1003 } }),
+                new QTable(new[] { "pos", "dates" },
                     new object[]
                     {
                         new[] {"d1", "d2", "d3"},
                         new[] {new QDate(366), new QDate(121), new QDate(int.MinValue)}
                     }));
-            var kt2 = new QKeyedTable(new[] {"pos", "dates", "eid"}, new[] {"eid"},
+            var kt2 = new QKeyedTable(new[] { "pos", "dates", "eid" }, new[] { "eid" },
                 new object[]
                 {
                     new[] {"d1", "d2", "d3"},
@@ -39,6 +39,90 @@ namespace qSharp.test
                     new[] {1001, 1002, 1003}
                 });
             Assert.IsTrue(kt1.Equals(kt2));
+        }
+
+        [Test]
+        public void TestQDictionary()
+        {
+            string[] keys = new string[] { "foo", "bar", "z" };
+            object[] values = new object[] { 1, "val", null };
+
+            var d = new QDictionary(keys, values);
+            Assert.IsTrue(d.Equals(new QDictionary(keys, values)));
+
+            var e = d.GetEnumerator();
+            int i = 0;
+            while (e.MoveNext())
+            {
+                var kv = e.Current;
+                Assert.AreEqual(keys[i], kv.Key);
+                Assert.AreEqual(values[i], kv.Value);
+                i++;
+            }
+
+            Assert.AreEqual(i, d.Count);
+
+            var table = new QTable(new[] { "eid" }, new object[] { new[] { 1001, 1002, 1003 } });
+            d = new QDictionary(keys, table);
+            Assert.IsTrue(d.Equals(new QDictionary(keys, table)));
+
+            e = d.GetEnumerator();
+            i = 0;
+            while (e.MoveNext())
+            {
+                var kv = e.Current;
+                Assert.AreEqual(keys[i], kv.Key);
+                Assert.AreEqual(table[i].ToArray(), ((QTable.Row)kv.Value).ToArray());
+                i++;
+            }
+
+            Assert.AreEqual(i, d.Count);
+        }
+
+        [Test]
+        public void TestQTable()
+        {
+            var columns = new[] { "pos", "dates" };
+            var data = new object[] { new[] { "d1", "d2", "d3" }, new[] { 1001, 1002, 1003 } };
+
+            var t = new QTable(columns, data);
+            Assert.AreEqual(t, new QTable(columns, data));
+
+            int i = 0;
+            var e = t.GetEnumerator();
+
+            while (e.MoveNext())
+            {
+                var r = e.Current;
+                Assert.AreEqual(t[i].ToArray(), r.ToArray());
+                i++;
+            }
+
+            Assert.AreEqual(i, t.RowsCount);
+        }
+
+        [Test]
+        public void TestQKeyedTable()
+        {
+            var columns = new[] { "pos", "dates", "eid" };
+            var keyColumns = new[] { "eid" };
+            var data = new object[] { new[] { "d1", "d2", "d3" }, new[] { new QDate(366), new QDate(121), new QDate(int.MinValue) }, new[] { 1001, 1002, 1003 } };
+
+            var kt = new QKeyedTable(columns, keyColumns, data);
+            Assert.AreEqual(kt, new QKeyedTable(columns, keyColumns, data));
+
+            int i = 0;
+            var e = kt.GetEnumerator();
+
+            while (e.MoveNext())
+            {
+                var ktp = e.Current;
+                Assert.AreEqual(kt.Keys[i], ktp.Key);
+                Assert.AreEqual(kt.Values[i], ktp.Value);
+                i++;
+            }
+
+            Assert.AreEqual(i, kt.RowsCount);
         }
     }
 }

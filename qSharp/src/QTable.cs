@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 
@@ -24,7 +25,7 @@ namespace qSharp
     /// <summary>
     ///     Represents a q table type.
     /// </summary>
-    public sealed class QTable : IEnumerable, IQTable
+    public sealed class QTable : IEnumerable<QTable.Row>, IQTable
     {
         private readonly string[] _columns;
         private readonly ListDictionary _columnsMap;
@@ -105,9 +106,18 @@ namespace qSharp
         ///     Returns an enumerator that iterates through rows in a table.
         /// </summary>
         /// <returns>An QTableEnumerator object that can be used to iterate through the table</returns>
-        public IEnumerator GetEnumerator()
+        public IEnumerator<QTable.Row> GetEnumerator()
         {
             return new QTableEnumerator(this);
+        }
+
+        /// <summary>
+        ///     Returns an enumerator that iterates through rows in a table.
+        /// </summary>
+        /// <returns>An QTableEnumerator object that can be used to iterate through the table</returns>
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
 
         /// <summary>
@@ -168,7 +178,7 @@ namespace qSharp
         /// <summary>
         ///     Iterator over rows in a table.
         /// </summary>
-        private sealed class QTableEnumerator : IEnumerator
+        private sealed class QTableEnumerator : IEnumerator<QTable.Row>
         {
             private readonly QTable _table;
             private int _index = -1;
@@ -178,9 +188,14 @@ namespace qSharp
                 _table = table;
             }
 
-            public object Current
+            public QTable.Row Current
             {
                 get { return new Row(_table, _index); }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return Current; }
             }
 
             public bool MoveNext()
@@ -190,6 +205,11 @@ namespace qSharp
             }
 
             public void Reset()
+            {
+                _index = -1;
+            }
+
+            public void Dispose()
             {
                 _index = -1;
             }

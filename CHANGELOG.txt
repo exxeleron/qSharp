@@ -1,4 +1,13 @@
 ------------------------------------------------------------------------------
+  qSharp 2.2.0 [2015.08.x]
+------------------------------------------------------------------------------
+
+  - API convenience extensions
+  - QTable, QDictionary and QKeyedTable now implements generic version of
+    IEnumerable interface
+  - Fix: QDictionary enumerator failing to retrieve values
+
+------------------------------------------------------------------------------
   qSharp 2.1.2 [2015.07.17]
 ------------------------------------------------------------------------------
 

@@ -16,13 +16,14 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace qSharp
 {
     /// <summary>
     ///     Represents a q dictionary type.
     /// </summary>
-    public sealed class QDictionary : IEnumerable
+    public sealed class QDictionary : IEnumerable<QDictionary.KeyValuePair>
     {
         private readonly bool _areValuesArray;
         private readonly Array _keys;
@@ -51,6 +52,7 @@ namespace qSharp
             _keys = keys;
             _values = values;
             _areValuesArray = true;
+            Count = keys.Length;
         }
 
         /// <summary>
@@ -76,6 +78,7 @@ namespace qSharp
             _keys = keys;
             _values = values;
             _areValuesArray = false;
+            Count = keys.Length;
         }
 
         /// <summary>
@@ -95,12 +98,26 @@ namespace qSharp
         }
 
         /// <summary>
+        ///     Gets a number of entries in the dictionary.
+        /// </summary>
+        public int Count { get; private set; }
+
+        /// <summary>
         ///     Returns an enumerator that iterates through a dictionary keys and values.
         /// </summary>
         /// <returns>An QDictionaryEnumerator object that can be used to iterate through the dictionary</returns>
-        public IEnumerator GetEnumerator()
+        public IEnumerator<QDictionary.KeyValuePair> GetEnumerator()
         {
             return new QDictionaryEnumerator(this);
+        }
+
+        /// <summary>
+        ///     Returns an enumerator that iterates through a dictionary keys and values.
+        /// </summary>
+        /// <returns>An QDictionaryEnumerator object that can be used to iterate through the dictionary</returns>
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
 
         /// <summary>
@@ -199,9 +216,10 @@ namespace qSharp
                         var qTable = _dictionary._values as QTable;
                         if (qTable != null) return qTable[_index];
                     }
-                    var table = _dictionary._values as QTable;
-                    if (table != null)
-                        return table[_index];
+                    else
+                    {
+                        return (_dictionary._values as Array).GetValue(_index);
+                    }
 
                     throw new NotFiniteNumberException(string.Format("Type {0} is unsupported.", _dictionary._values != null ? _dictionary._values.GetType().Name : "null"));
                 }
@@ -211,7 +229,7 @@ namespace qSharp
         /// <summary>
         ///     Iterator over pairs [key, value] stored in a dictionary.
         /// </summary>
-        private sealed class QDictionaryEnumerator : IEnumerator
+        private sealed class QDictionaryEnumerator : IEnumerator<QDictionary.KeyValuePair>
         {
             private readonly QDictionary _dictionary;
             private int _index = -1;
@@ -221,9 +239,14 @@ namespace qSharp
                 _dictionary = dictionary;
             }
 
-            public object Current
+            public QDictionary.KeyValuePair Current
             {
                 get { return new KeyValuePair(_dictionary, _index); }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return Current; }
             }
 
             public bool MoveNext()
@@ -233,6 +256,11 @@ namespace qSharp
             }
 
             public void Reset()
+            {
+                _index = -1;
+            }
+
+            public void Dispose()
             {
                 _index = -1;
             }

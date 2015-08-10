@@ -19,18 +19,18 @@ using System;
 namespace qSharp
 {
     /// <summary>
-    ///     Common interface for the q date/time types.
+    ///     Common interface for the q table types.
     /// </summary>
     public interface IQTable
     {
         /// <summary>
-        ///     Gets a number of rows in current QTable.
+        ///     Gets a number of rows in table.
         /// </summary>
         int RowsCount { get; }
 
         /// <summary>
-        ///     Gets a number of columns in current QTable.
+        ///     Gets a number of columns in table.
         /// </summary>
-        int ColumnsCount { get;  }       
+        int ColumnsCount { get; }
     }
 }

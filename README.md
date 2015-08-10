@@ -1,6 +1,6 @@
 <!-- img src="http://www.devnet.de/fileadmin/images/DEVnet_Logo2014.png" width="150px" height="150px"/-->
 
-qSharp 2.1
+qSharp 2.2
 ==========
 
 The q/kdb+ interface is implemented as a set of C# classes and provides:
