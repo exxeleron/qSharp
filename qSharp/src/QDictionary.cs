@@ -185,15 +185,15 @@ namespace qSharp
         public struct KeyValuePair
         {
             private readonly QDictionary _dictionary;
-            private readonly int _index;
+            public int Index { get; internal set; }
 
             /// <summary>
             ///     Initializes a new instance of the KeyValuePair.
             /// </summary>
-            public KeyValuePair(QDictionary dictionary, int index)
+            public KeyValuePair(QDictionary dictionary, int index) : this()
             {
                 _dictionary = dictionary;
-                _index = index;
+                Index = index;
             }
 
             /// <summary>
@@ -201,7 +201,7 @@ namespace qSharp
             /// </summary>
             public object Key
             {
-                get { return _dictionary._keys.GetValue(_index); }
+                get { return _dictionary._keys.GetValue(Index); }
             }
 
             /// <summary>
@@ -214,14 +214,13 @@ namespace qSharp
                     if (!_dictionary._areValuesArray)
                     {
                         var qTable = _dictionary._values as QTable;
-                        if (qTable != null) return qTable[_index];
+                        
+                        return qTable[Index];
                     }
                     else
                     {
-                        return (_dictionary._values as Array).GetValue(_index);
+                        return (_dictionary._values as Array).GetValue(Index);
                     }
-
-                    throw new NotFiniteNumberException(string.Format("Type {0} is unsupported.", _dictionary._values != null ? _dictionary._values.GetType().Name : "null"));
                 }
             }
         }
@@ -233,15 +232,17 @@ namespace qSharp
         {
             private readonly QDictionary _dictionary;
             private int _index = -1;
+            private QDictionary.KeyValuePair _current;
 
             public QDictionaryEnumerator(QDictionary dictionary)
             {
                 _dictionary = dictionary;
+                _current = new QDictionary.KeyValuePair(_dictionary, _index);
             }
 
             public QDictionary.KeyValuePair Current
             {
-                get { return new KeyValuePair(_dictionary, _index); }
+                get { return _current; }
             }
 
             object IEnumerator.Current
@@ -252,6 +253,7 @@ namespace qSharp
             public bool MoveNext()
             {
                 _index++;
+                _current.Index = _index;
                 return _index < _dictionary._keys.Length;
             }
 

@@ -181,16 +181,18 @@ namespace qSharp
         private sealed class QTableEnumerator : IEnumerator<QTable.Row>
         {
             private readonly QTable _table;
-            private int _index = -1;
+            private int _index = 0;
+            private QTable.Row _current;
 
             public QTableEnumerator(QTable table)
             {
                 _table = table;
+                _current = new Row(_table, _index);
             }
 
             public QTable.Row Current
             {
-                get { return new Row(_table, _index); }
+                get { return _current; }
             }
 
             object IEnumerator.Current
@@ -200,8 +202,8 @@ namespace qSharp
 
             public bool MoveNext()
             {
-                _index++;
-                return _index < _table.RowsCount;
+                _current.Index = _index;
+                return _index++ < _table.RowsCount;
             }
 
             public void Reset()
@@ -220,20 +222,20 @@ namespace qSharp
         /// </summary>
         public struct Row : IEnumerable
         {
-            private readonly int _rowIndex;
             private readonly QTable _table;
+            public int Index { get; internal set; }
 
             /// <summary>
             ///     Initializes a new instance of the Row.
             /// </summary>
-            public Row(QTable table, int rowIndex)
+            public Row(QTable table, int rowIndex) : this()
             {
                 if (rowIndex < 0 || rowIndex > table.RowsCount)
                 {
                     throw new ArgumentOutOfRangeException();
                 }
                 _table = table;
-                _rowIndex = rowIndex;
+                Index = rowIndex;
             }
 
             /// <summary>
@@ -251,8 +253,8 @@ namespace qSharp
             /// <returns>object</returns>
             public object this[int index]
             {
-                get { return ((Array) _table.Data.GetValue(index)).GetValue(_rowIndex); }
-                set { ((Array) _table.Data.GetValue(index)).SetValue(value, _rowIndex); }
+                get { return ((Array)_table.Data.GetValue(index)).GetValue(Index); }
+                set { ((Array)_table.Data.GetValue(index)).SetValue(value, Index); }
             }
 
             /// <summary>

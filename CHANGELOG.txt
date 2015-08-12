@@ -5,6 +5,8 @@
   - API convenience extensions
   - QTable, QDictionary and QKeyedTable now implements generic version of
     IEnumerable interface
+  - Improved memory reuse while iterating over QTable, QDictionary 
+    and QKeyedTable
   - Fix: QDictionary enumerator failing to retrieve values
 
 ------------------------------------------------------------------------------

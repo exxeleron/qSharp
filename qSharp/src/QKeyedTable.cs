@@ -207,16 +207,16 @@ namespace qSharp
         /// </summary>
         public struct KeyValuePair
         {
-            private readonly int _index;
             private readonly QKeyedTable _kt;
+            public int Index { get; internal set; }
 
             /// <summary>
             ///     Initializes a new instance of the KeyValuePair.
             /// </summary>
-            public KeyValuePair(QKeyedTable table, int index)
+            public KeyValuePair(QKeyedTable table, int index) : this()
             {
                 _kt = table;
-                _index = index;
+                Index = index;
             }
 
             /// <summary>
@@ -224,7 +224,7 @@ namespace qSharp
             /// </summary>
             public object Key
             {
-                get { return _kt._keys[_index]; }
+                get { return _kt._keys[Index]; }
             }
 
             /// <summary>
@@ -232,7 +232,7 @@ namespace qSharp
             /// </summary>
             public object Value
             {
-                get { return _kt._values[_index]; }
+                get { return _kt._values[Index]; }
             }
         }
 
@@ -242,16 +242,18 @@ namespace qSharp
         private sealed class QKeyedTableEnumerator : IEnumerator<QKeyedTable.KeyValuePair>
         {
             private readonly QKeyedTable _kt;
-            private int _index = -1;
+            private int _index = 0;
+            private QKeyedTable.KeyValuePair _current;
 
             public QKeyedTableEnumerator(QKeyedTable table)
             {
                 _kt = table;
+                _current = new KeyValuePair(_kt, _index);
             }
 
             public QKeyedTable.KeyValuePair Current
             {
-                get { return new KeyValuePair(_kt, _index); }
+                get { return _current; }
             }
 
             object IEnumerator.Current
@@ -261,8 +263,8 @@ namespace qSharp
 
             public bool MoveNext()
             {
-                _index++;
-                return _index < _kt._keys.RowsCount;
+                _current.Index = _index; 
+                return _index++ < _kt._keys.RowsCount;
             }
 
             public void Reset()
