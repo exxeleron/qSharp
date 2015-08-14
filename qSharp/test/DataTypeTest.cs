@@ -15,6 +15,7 @@
 //
 
 using NUnit.Framework;
+using System;
 
 namespace qSharp.test
 {
@@ -88,6 +89,12 @@ namespace qSharp.test
             var t = new QTable(columns, data);
             Assert.AreEqual(t, new QTable(columns, data));
 
+            Assert.IsTrue(t.HasColumn("pos"));
+            Assert.IsFalse(t.HasColumn("unknown"));
+
+            Assert.AreEqual(1, t.GetColumnIndex("dates"));
+            Assert.Throws<NullReferenceException>(() => t.GetColumnIndex("unknown"));
+
             int i = 0;
             var e = t.GetEnumerator();
 
@@ -110,6 +117,14 @@ namespace qSharp.test
 
             var kt = new QKeyedTable(columns, keyColumns, data);
             Assert.AreEqual(kt, new QKeyedTable(columns, keyColumns, data));
+
+            Assert.IsTrue(kt.HasColumn("pos"));
+            Assert.IsFalse(kt.HasColumn("unknown"));
+
+            Assert.AreEqual(0, kt.GetColumnIndex("eid"));
+            Assert.AreEqual(1, kt.GetColumnIndex("pos"));
+            Assert.AreEqual(2, kt.GetColumnIndex("dates"));
+            Assert.Throws<NullReferenceException>(() => kt.GetColumnIndex("unknown"));
 
             int i = 0;
             var e = kt.GetEnumerator();

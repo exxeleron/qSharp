@@ -63,7 +63,7 @@ namespace qSharp
 
             _columns = columns;
             Data = data;
-            RowsCount = ((Array) data.GetValue(0)).Length;
+            RowsCount = ((Array)data.GetValue(0)).Length;
         }
 
         /// <summary>
@@ -121,13 +121,23 @@ namespace qSharp
         }
 
         /// <summary>
+        /// Checks whether table contains column with given name.
+        /// </summary>
+        /// <param name="column">Name of the column</param>
+        /// <returns>true if table contains column with given name, false otherwise</returns>
+        public bool HasColumn(string column)
+        {
+            return _columnsMap.Contains(column);
+        }
+
+        /// <summary>
         ///     Gets a column index for specified name.
         /// </summary>
         /// <param name="column">Name of the column</param>
-        /// <returns>0 based column index</returns>
+        /// <returns>0 based column index
         public int GetColumnIndex(string column)
         {
-            return (int) _columnsMap[column];
+            return (int)_columnsMap[column];
         }
 
         /// <summary>
@@ -148,7 +158,7 @@ namespace qSharp
 
         public override int GetHashCode()
         {
-            return 31*Columns.GetHashCode() + Data.GetHashCode();
+            return 31 * Columns.GetHashCode() + Data.GetHashCode();
         }
 
         /// <summary>
@@ -228,7 +238,8 @@ namespace qSharp
             /// <summary>
             ///     Initializes a new instance of the Row.
             /// </summary>
-            public Row(QTable table, int rowIndex) : this()
+            public Row(QTable table, int rowIndex)
+                : this()
             {
                 if (rowIndex < 0 || rowIndex > table.RowsCount)
                 {

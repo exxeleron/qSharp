@@ -158,6 +158,33 @@ namespace qSharp
         }
 
         /// <summary>
+        /// Checks whether table contains column with given name.
+        /// </summary>
+        /// <param name="column">Name of the column</param>
+        /// <returns>true if table contains column with given name, false otherwise</returns>
+        public bool HasColumn(string column)
+        {
+            return _keys.HasColumn(column) || _values.HasColumn(column);
+        }
+
+        /// <summary>
+        ///     Gets a column index for specified name.
+        /// </summary>
+        /// <param name="column">Name of the column</param>
+        /// <returns>0 based column index
+        public int GetColumnIndex(string column)
+        {
+            if (_keys.HasColumn(column))
+            {
+                return _keys.GetColumnIndex(column);
+            }
+            else
+            {
+                return _values.GetColumnIndex(column) + _keys.ColumnsCount;
+            }
+        }
+
+        /// <summary>
         ///     Determines whether the specified System.Object is equal to the current QKeyedTable.
         /// </summary>
         /// <param name="obj">The System.Object to compare with the current QKeyedTable.</param>
