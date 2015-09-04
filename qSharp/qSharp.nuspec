@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://github.com/exxeleron/qSharp/blob/master/LICENSE</licenseUrl>
+    <projectUrl>http://github.com/exxeleron/qSharp</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Interprocess communication between C# and kdb+</description>
+    <copyright>Copyright 2014-2015</copyright>
+    <tags>kdb+ c# qSharp</tags>
+  </metadata>
+</package>

@@ -13,3 +13,10 @@ The q/kdb+ interface is implemented as a set of C# classes and provides:
 
 
 For more details please refer to the [documentation](doc/Readme.md)
+
+Installation
+============
+
+To install qSharp from [NuGet Gallery](http://www.nuget.org/packages/qSharp/):
+
+``nuget install qSharp``
