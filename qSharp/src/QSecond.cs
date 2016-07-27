@@ -101,7 +101,7 @@ namespace qSharp
                 var minutes = int.Parse(parts[1]);
                 var seconds = int.Parse(parts[2]);
 
-                return new QSecond((seconds + 60*minutes + 3600*Math.Abs(hours))*(hours > 0 ? 1 : -1));
+                return new QSecond((seconds + 60*minutes + 3600*Math.Abs(hours))*('-' == date[0] ? -1 : 1));
             }
             catch (Exception e)
             {

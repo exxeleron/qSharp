@@ -106,7 +106,7 @@ namespace qSharp
                 var minutes = int.Parse(parts[1]);
                 var seconds = int.Parse(parts[2]);
                 var millis = int.Parse(parts[3]);
-                return new QTime((millis + 1000*seconds + 60000*minutes + 3600000*Math.Abs(hours))*(hours > 0 ? 1 : -1));
+                return new QTime((millis + 1000*seconds + 60000*minutes + 3600000*Math.Abs(hours))*('-' == date[0] ? -1 : 1));
             }
             catch (Exception e)
             {
